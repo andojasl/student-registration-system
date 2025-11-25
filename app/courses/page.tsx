@@ -1,65 +1,22 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Users, BookOpen } from "lucide-react";
+import { getCoursesWithStudentCount } from "@/lib/db/queries";
 
-const courses = [
-  {
-    id: 1,
-    name: "Data Structures & Algorithms",
-    code: "CS301",
-    instructor: "Dr. Sarah Johnson",
-    students: 45,
-    schedule: "Mon, Wed 10:00 AM",
-    color: "bg-blue-500",
-  },
-  {
-    id: 2,
-    name: "Web Development",
-    code: "CS205",
-    instructor: "Prof. Michael Chen",
-    students: 38,
-    schedule: "Tue, Thu 2:00 PM",
-    color: "bg-purple-500",
-  },
-  {
-    id: 3,
-    name: "Database Systems",
-    code: "CS302",
-    instructor: "Dr. Emily Rodriguez",
-    students: 42,
-    schedule: "Mon, Wed 1:00 PM",
-    color: "bg-green-500",
-  },
-  {
-    id: 4,
-    name: "Software Engineering",
-    code: "CS401",
-    instructor: "Prof. James Wilson",
-    students: 35,
-    schedule: "Tue, Thu 10:00 AM",
-    color: "bg-orange-500",
-  },
-  {
-    id: 5,
-    name: "Computer Networks",
-    code: "CS303",
-    instructor: "Dr. Amanda Lee",
-    students: 40,
-    schedule: "Wed, Fri 3:00 PM",
-    color: "bg-pink-500",
-  },
-  {
-    id: 6,
-    name: "Artificial Intelligence",
-    code: "CS405",
-    instructor: "Prof. David Park",
-    students: 30,
-    schedule: "Mon, Wed 4:00 PM",
-    color: "bg-indigo-500",
-  },
+const courseColors = [
+  "bg-blue-500",
+  "bg-purple-500",
+  "bg-green-500",
+  "bg-orange-500",
+  "bg-pink-500",
+  "bg-indigo-500",
+  "bg-cyan-500",
+  "bg-amber-500",
 ];
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+  const courses = await getCoursesWithStudentCount();
+
   return (
     <div className="space-y-8">
       <div>
@@ -70,15 +27,15 @@ export default function CoursesPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {courses.map((course) => (
+        {courses.map((course, index) => (
           <Card key={course.id} className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer">
             <CardHeader className="pb-4">
-              <div className={`h-2 w-full rounded-t-lg ${course.color} -mt-6 -mx-6 mb-4`} />
+              <div className={`h-2 w-full rounded-t-lg ${courseColors[index % courseColors.length]} -mt-6 -mx-6 mb-4`} />
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <CardTitle className="text-lg">{course.name}</CardTitle>
                   <Badge variant="secondary" className="font-mono text-xs">
-                    {course.code}
+                    {course.credits} Credits
                   </Badge>
                 </div>
               </div>
@@ -87,21 +44,34 @@ export default function CoursesPage() {
               <div className="space-y-2">
                 <div className="flex items-center text-sm text-muted-foreground">
                   <BookOpen className="mr-2 h-4 w-4" />
-                  {course.instructor}
+                  {course.lecturers?.first_name} {course.lecturers?.last_name}
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="mr-2 h-4 w-4" />
-                  {course.schedule}
+                  {course.departments?.name || "N/A"}
                 </div>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Users className="mr-2 h-4 w-4" />
-                  {course.students} students
+                  {course.student_count || 0} students
                 </div>
+              </div>
+              <div className="pt-2 border-t">
+                <p className="text-xs text-muted-foreground line-clamp-2">
+                  {course.description}
+                </p>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {courses.length === 0 && (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <p className="text-muted-foreground">No courses found. Contact your administrator to enroll in courses.</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
