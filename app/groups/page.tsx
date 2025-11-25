@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -9,9 +10,7 @@ import {
 import { Users, Mail, UserCircle } from "lucide-react";
 import { getGroups } from "@/lib/db/queries";
 
-export default async function GroupsPage() {
-  const groups = await getGroups();
-
+export default function GroupsPage() {
   return (
     <div className="space-y-8">
       <div>
@@ -21,6 +20,18 @@ export default async function GroupsPage() {
         </p>
       </div>
 
+      <Suspense fallback={<GroupsFallback />}>
+        <GroupsContent />
+      </Suspense>
+    </div>
+  );
+}
+
+async function GroupsContent() {
+  const groups = await getGroups();
+
+  return (
+    <>
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -95,6 +106,18 @@ export default async function GroupsPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </>
+  );
+}
+
+function GroupsFallback() {
+  return (
+    <Card>
+      <CardContent className="p-8 space-y-3">
+        <div className="h-6 w-48 rounded bg-muted animate-pulse" />
+        <div className="h-4 w-64 rounded bg-muted animate-pulse" />
+        <div className="h-4 w-56 rounded bg-muted animate-pulse" />
+      </CardContent>
+    </Card>
   );
 }
