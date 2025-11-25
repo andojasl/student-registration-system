@@ -9,20 +9,64 @@ export async function signUp(formData: FormData) {
 
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
-  const fullName = formData.get('fullName') as string;
+  const firstName = formData.get('firstName') as string;
+  const lastName = formData.get('lastName') as string;
+  const phone = formData.get('phone') as string;
+  const dateOfBirth = formData.get('dateOfBirth') as string;
+  const programId = parseInt(formData.get('programId') as string);
 
-  const { error } = await supabase.auth.signUp({
+  // Step 1: Create auth user
+  const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: {
-        full_name: fullName,
+        first_name: firstName,
+        last_name: lastName,
       },
     },
   });
 
-  if (error) {
-    return redirect('/auth/signup?error=' + encodeURIComponent(error.message));
+  if (authError) {
+    return redirect('/auth/signup?error=' + encodeURIComponent(authError.message));
+  }
+
+  if (!authData.user) {
+    return redirect('/auth/signup?error=' + encodeURIComponent('Failed to create user account'));
+  }
+
+  // Step 2: Create USER record with inactive status
+  const { error: userError } = await supabase
+    .from('user')
+    .insert({
+      id: authData.user.id,
+      role: 'student',
+      is_active: false,
+    });
+
+  if (userError) {
+    console.error('Error creating user record:', userError);
+    return redirect('/auth/signup?error=' + encodeURIComponent('Failed to create user profile'));
+  }
+
+  // Step 3: Create STUDENT record
+  const { error: studentError } = await supabase
+    .from('students')
+    .insert({
+      user_id: authData.user.id,
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      phone: phone,
+      date_of_birth: dateOfBirth,
+      program_id: programId,
+      group_id: null, // Will be assigned after approval
+      department_id: null, // Will be assigned after approval
+    });
+
+  if (studentError) {
+    console.error('Error creating student record:', studentError);
+    return redirect('/auth/signup?error=' + encodeURIComponent('Failed to create student profile'));
   }
 
   return redirect('/auth/signup?success=true');
@@ -34,7 +78,7 @@ export async function signIn(formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -43,8 +87,26 @@ export async function signIn(formData: FormData) {
     return redirect('/auth/login?error=' + encodeURIComponent(error.message));
   }
 
+  // Check if user is active
+  const { data: userData } = await supabase
+    .from('user')
+    .select('is_active, role')
+    .eq('id', data.user.id)
+    .single();
+
+  if (!userData?.is_active) {
+    await supabase.auth.signOut();
+    return redirect('/auth/login?error=' + encodeURIComponent('Your account is pending approval. Please wait for a lecturer to activate your account.'));
+  }
+
   revalidatePath('/', 'layout');
-  return redirect('/');
+  
+  // Redirect based on role
+  if (userData.role === 'lecturer') {
+    return redirect('/lecturer/dashboard');
+  } else {
+    return redirect('/');
+  }
 }
 
 export async function signOut() {
@@ -59,5 +121,37 @@ export async function getUser() {
   noStore();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  
+  if (!user) return null;
+
+  // Get user role and active status
+  const { data: userData } = await supabase
+    .from('user')
+    .select('role, is_active')
+    .eq('id', user.id)
+    .single();
+
+  return {
+    ...user,
+    role: userData?.role,
+    is_active: userData?.is_active,
+  };
+}
+
+export async function getPrograms() {
+  const { unstable_noStore: noStore } = await import('next/cache');
+  noStore();
+  const supabase = await createClient();
+  
+  const { data, error } = await supabase
+    .from('programs')
+    .select('id, name, degree_type, duration')
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching programs:', error);
+    return [];
+  }
+
+  return data || [];
 }
