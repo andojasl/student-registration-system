@@ -230,24 +230,30 @@ export async function getCoursesWithStudentCount() {
     return [];
   }
 
-  // Get registration counts for each course
-  const { data: counts, error: countsError } = await supabase
+  // Get all registrations and count them per course locally.
+  const { data: registrations, error: registrationsError } = await supabase
     .from("registrations")
-    .select("course_id, student_id.count()", { count: "exact" });
+    .select("course_id");
 
-  if (countsError) {
-    console.error("Error fetching counts:", countsError);
-    return courses?.map(course => ({ ...course, student_count: 0 })) || [];
+  if (registrationsError) {
+    console.error("Error fetching registration counts:", registrationsError);
+    return courses?.map((course) => ({ ...course, student_count: 0 })) || [];
   }
 
+  const countsByCourse = registrations?.reduce<Record<number, number>>((acc, registration) => {
+    if (registration.course_id != null) {
+      acc[registration.course_id] = (acc[registration.course_id] || 0) + 1;
+    }
+    return acc;
+  }, {}) || {};
+
   // Combine the data
-  return courses?.map(course => {
-    const enrollment = counts?.filter(c => c.course_id === course.id) || [];
-    return {
+  return (
+    courses?.map((course) => ({
       ...course,
-      student_count: enrollment.length,
-    };
-  }) || [];
+      student_count: countsByCourse[course.id] || 0,
+    })) || []
+  );
 }
 
 /**
