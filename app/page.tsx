@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { BookOpen, Users, Bell, GraduationCap, Building2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -13,7 +14,24 @@ const recentActivity = [
   { id: 7, message: "Upcoming deadline for Computer Networks project", time: "4 days ago" },
 ];
 
-export default async function Dashboard() {
+export default function Dashboard() {
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground mt-2">
+          Welcome back! Here's what's happening with your courses.
+        </p>
+      </div>
+
+      <Suspense fallback={<DashboardFallback />}>
+        <DashboardContent />
+      </Suspense>
+    </div>
+  );
+}
+
+async function DashboardContent() {
   const [courses, groups, departments, lecturers] = await Promise.all([
     getCourses(),
     getGroups(),
@@ -53,14 +71,7 @@ export default async function Dashboard() {
   ];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
-          Welcome back! Here's what's happening with your courses.
-        </p>
-      </div>
-
+    <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Link key={stat.title} href={stat.href}>
@@ -146,6 +157,31 @@ export default async function Dashboard() {
           </CardContent>
         </Card>
       </div>
+    </>
+  );
+}
+
+function DashboardFallback() {
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Card key={index}>
+            <CardContent className="space-y-3 py-6">
+              <div className="h-4 w-24 rounded bg-muted animate-pulse" />
+              <div className="h-8 w-16 rounded bg-muted animate-pulse" />
+              <div className="h-3 w-full rounded bg-muted animate-pulse" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <Card>
+        <CardContent className="space-y-3 py-6">
+          <div className="h-5 w-40 rounded bg-muted animate-pulse" />
+          <div className="h-4 w-full rounded bg-muted animate-pulse" />
+          <div className="h-4 w-3/4 rounded bg-muted animate-pulse" />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Users, BookOpen } from "lucide-react";
@@ -14,9 +15,7 @@ const courseColors = [
   "bg-amber-500",
 ];
 
-export default async function CoursesPage() {
-  const courses = await getCoursesWithStudentCount();
-
+export default function CoursesPage() {
   return (
     <div className="space-y-8">
       <div>
@@ -26,6 +25,18 @@ export default async function CoursesPage() {
         </p>
       </div>
 
+      <Suspense fallback={<CoursesFallback />}>
+        <CoursesContent />
+      </Suspense>
+    </div>
+  );
+}
+
+async function CoursesContent() {
+  const courses = await getCoursesWithStudentCount();
+
+  return (
+    <>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {courses.map((course, index) => (
           <Card key={course.id} className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer">
@@ -72,6 +83,23 @@ export default async function CoursesPage() {
           </CardContent>
         </Card>
       )}
+    </>
+  );
+}
+
+function CoursesFallback() {
+  return (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <Card key={index}>
+          <CardContent className="space-y-3 py-6">
+            <div className="h-4 w-32 rounded bg-muted animate-pulse" />
+            <div className="h-3 w-20 rounded bg-muted animate-pulse" />
+            <div className="h-3 w-full rounded bg-muted animate-pulse" />
+            <div className="h-3 w-5/6 rounded bg-muted animate-pulse" />
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
