@@ -60,8 +60,8 @@ export async function signUp(formData: FormData) {
       phone: phone,
       date_of_birth: dateOfBirth,
       program_id: programId,
-      group_id: null, // Will be assigned after approval
-      department_id: null, // Will be assigned after approval
+      group_id: null,
+      department_id: null,
     });
 
   if (studentError) {
