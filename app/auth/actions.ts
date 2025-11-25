@@ -55,6 +55,8 @@ export async function signOut() {
 }
 
 export async function getUser() {
+  const { unstable_noStore: noStore } = await import('next/cache');
+  noStore();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   return user;

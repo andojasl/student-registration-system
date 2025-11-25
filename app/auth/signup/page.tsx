@@ -4,12 +4,14 @@ import Link from "next/link";
 import { signUp } from "../actions";
 import { GraduationCap, CheckCircle } from "lucide-react";
 
-export default function SignUpPage({
+export default async function SignUpPage({
   searchParams,
 }: {
-  searchParams: { error?: string; success?: string };
+  searchParams: Promise<{ error?: string; success?: string }>;
 }) {
-  if (searchParams.success === 'true') {
+  const params = await searchParams;
+
+  if (params.success === 'true') {
     return (
       <div className="min-h-screen flex items-center justify-center dark:from-gray-900 dark:to-gray-800 p-4">
         <Card className="w-full max-w-md">
@@ -51,9 +53,9 @@ export default function SignUpPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {searchParams.error && (
+          {params.error && (
             <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-              {searchParams.error}
+              {params.error}
             </div>
           )}
 

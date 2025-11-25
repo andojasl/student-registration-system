@@ -4,13 +4,15 @@ import Link from "next/link";
 import { signIn } from "../actions";
 import { GraduationCap } from "lucide-react";
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: Promise<{ error?: string }>;
 }) {
+  const params = await searchParams;
+
   return (
-    <div className="min-h-screen flex items-center justify-center dark:from-gray-900 dark:to-gray-800 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
@@ -24,9 +26,9 @@ export default function LoginPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {searchParams.error && (
+          {params.error && (
             <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-              {searchParams.error}
+              {params.error}
             </div>
           )}
 
