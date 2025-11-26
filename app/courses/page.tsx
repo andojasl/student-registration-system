@@ -1,15 +1,25 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Users, BookOpen } from "lucide-react";
-import { getCoursesWithStudentCount } from "@/lib/db/queries";
+import { Button } from "@/components/ui/button";
+import {
+  Calendar,
+  Users,
+  BookOpen,
+  Plus,
+  CheckCircle,
+  Clock,
+  GraduationCap,
+  ChevronRight,
+} from "lucide-react";
+import { getStudentRegisteredCourses } from "@/app/courses/actions";
+import Link from "next/link";
 
 const courseColors = [
   "bg-blue-500",
@@ -22,14 +32,43 @@ const courseColors = [
   "bg-amber-500",
 ];
 
-export default function CoursesPage() {
+const statusConfig = {
+  active: {
+    label: "Active",
+    icon: CheckCircle,
+    className:
+      "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+  },
+  pending: {
+    label: "Pending",
+    icon: Clock,
+    className:
+      "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+  },
+  complete: {
+    label: "Complete",
+    icon: GraduationCap,
+    className:
+      "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+  },
+};
+
+export default function StudentCoursesPage() {
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">My Courses</h1>
-        <p className="text-muted-foreground mt-2">
-          Manage and view all your enrolled courses
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">My Courses</h1>
+          <p className="text-muted-foreground mt-2">
+            Manage and view all your enrolled courses
+          </p>
+        </div>
+        <Link href="/student/courses/browse">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Browse Courses
+          </Button>
+        </Link>
       </div>
 
       <Suspense fallback={<CoursesFallback />}>
@@ -40,67 +79,104 @@ export default function CoursesPage() {
 }
 
 async function CoursesContent() {
-  const courses = await getCoursesWithStudentCount();
+  const registrations = await getStudentRegisteredCourses();
 
   return (
     <>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {courses.map((course, index) => (
-          <Link
-            key={course.id}
-            href={`/courses/${course.id}`}
-            className="block"
-          >
-            <Card className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer">
-              <CardHeader className="pb-4">
-                <div
-                  className={`h-2 w-full rounded-t-lg ${
-                    courseColors[index % courseColors.length]
-                  } -mt-6 -mx-6 mb-4`}
-                />
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">{course.name}</CardTitle>
-                    <Badge variant="secondary" className="font-mono text-xs">
-                      {course.credits} Credits
-                    </Badge>
+        {registrations.map((registration: any, index: number) => {
+          const statusKey = registration.status as keyof typeof statusConfig;
+          const StatusIcon = statusConfig[statusKey]. icon;
+
+          return (
+            <Link
+              key={registration.id}
+              href={`/student/courses/${registration.course_id}`}
+              className="group"
+            >
+              <Card className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer h-full">
+                <CardHeader className="pb-4">
+                  <div
+                    className={`h-2 w-full rounded-t-lg ${
+                      courseColors[index % courseColors.length]
+                    } -mt-6 -mx-6 mb-4`}
+                  />
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1 flex-1">
+                      <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                        {registration.course_name}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant="secondary" className="font-mono text-xs">
+                          {registration.credits} Credits
+                        </Badge>
+                        <Badge className={statusConfig[statusKey].className}>
+                          <StatusIcon className="mr-1 h-3 w-3" />
+                          {statusConfig[statusKey].label}
+                        </Badge>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors mt-1" />
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    {course.lecturers?.first_name}{" "}
-                    {course.lecturers?.last_name}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      {registration.lecturer_name}
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {registration. department_name || "N/A"}
+                    </div>
+                    {registration.semester_name && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Users className="mr-2 h-4 w-4" />
+                        {registration.semester_name}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {course.departments?.name || "N/A"}
+
+                  {registration.grade && (
+                    <div className="pt-2 border-t">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Final Grade:</span>
+                        <span className="text-lg font-bold">
+                          {registration.grade}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-2 border-t">
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {registration.description}
+                    </p>
                   </div>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Users className="mr-2 h-4 w-4" />
-                    {course.student_count || 0} students
+
+                  <div className="text-xs text-muted-foreground">
+                    Registered:{" "}
+                    {new Date(registration.reg_date).toLocaleDateString()}
                   </div>
-                </div>
-                <div className="pt-2 border-t">
-                  <p className="text-xs text-muted-foreground line-clamp-2">
-                    {course.description}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+                </CardContent>
+              </Card>
+            </Link>
+          );
+        })}
       </div>
 
-      {courses.length === 0 && (
+      {registrations.length === 0 && (
         <Card>
-          <CardContent className="p-12 text-center">
+          <CardContent className="p-12 text-center space-y-4">
             <p className="text-muted-foreground">
-              No courses found. Contact your administrator to enroll in
-              courses.
+              No courses found. Browse available courses to get started. 
             </p>
+            <Link href="/student/courses/browse">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Browse Courses
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       )}
