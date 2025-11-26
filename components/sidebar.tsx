@@ -7,23 +7,26 @@ import { cn } from "@/lib/utils";
 import { signOut } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
 
+interface SidebarProps {
+  userEmail?: string;
+  role?: string | null;
+}
+
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "My Courses", href: "/courses", icon: BookOpen },
   { name: "My Groups", href: "/groups", icon: Users },
 ];
 
-interface SidebarProps {
-  userEmail?: string;
-}
-
-export function Sidebar({ userEmail }: SidebarProps) {
+export function Sidebar({ userEmail, role }: SidebarProps) {
   const pathname = usePathname();
 
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-background">
       <div className="flex h-16 items-center border-b px-6">
-        <h1 className="text-xl font-bold">Student Portal</h1>
+        <h1 className="text-xl font-bold">
+          {role === "lecturer" ? "Lecturer Dashboard" : "Student Portal"}
+        </h1>
       </div>
       <nav className="flex-1 space-y-1 p-4">
         {navigation.map((item) => {

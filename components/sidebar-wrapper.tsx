@@ -4,7 +4,7 @@ import { getUser } from "@/app/auth/actions";
 
 async function SidebarContent() {
   const user = await getUser();
-  return <Sidebar userEmail={user?.email} />;
+  return <Sidebar userEmail={user?.email} role={user?.role} />;
 }
 
 function SidebarSkeleton() {
