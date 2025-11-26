@@ -348,7 +348,7 @@ export async function getCurrentStudentProfile() {
     .from("students")
     .select("id, user_id, first_name, last_name, email, phone, date_of_birth, avatar_url, program_id, group_id, department_id")
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("Error fetching student profile:", error);
@@ -370,7 +370,7 @@ export async function getCurrentLecturerProfile() {
     .from("lecturers")
     .select("id, user_id, first_name, last_name, email, phone, avatar_url, program_id")
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("Error fetching lecturer profile:", error);
