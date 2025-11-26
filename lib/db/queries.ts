@@ -336,6 +336,75 @@ export async function getCurrentStudent(): Promise<Student | null> {
   return student as Student;
 }
 
+// Get profile for current student
+export async function getCurrentStudentProfile() {
+  noStore();
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("students")
+    .select("id, user_id, first_name, last_name, email, phone, date_of_birth, avatar_url, program_id, group_id, department_id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching student profile:", error);
+    return null;
+  }
+
+  return data;
+}
+
+// Get profile for current lecturer
+export async function getCurrentLecturerProfile() {
+  noStore();
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("lecturers")
+    .select("id, user_id, first_name, last_name, email, phone, avatar_url, program_id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching lecturer profile:", error);
+    return null;
+  }
+
+  return data;
+}
+
+// Unified profile getter
+export async function getCurrentUserProfile() {
+  noStore();
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  // Get role
+  const { data: userData } = await supabase
+    .from('user')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (!userData) return null;
+
+  // Fetch appropriate profile based on role
+  if (userData.role === 'student') {
+    return getCurrentStudentProfile();
+  } else {
+    return getCurrentLecturerProfile();
+  }
+}
+
 export async function joinGroupForCurrentStudent(
   groupId: number
 ): Promise<Student | null> {

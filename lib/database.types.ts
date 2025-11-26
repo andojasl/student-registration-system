@@ -22,6 +22,7 @@ export type Database = {
           id: number
           lecturer_id: number
           name: string
+          program_id: number
           semester_id: number
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           id?: number
           lecturer_id: number
           name: string
+          program_id: number
           semester_id: number
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           id?: number
           lecturer_id?: number
           name?: string
+          program_id?: number
           semester_id?: number
         }
         Relationships: [
@@ -58,7 +61,14 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "courses_semesters_fk"
+            foreignKeyName: "courses_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_semester_id_fkey"
             columns: ["semester_id"]
             isOneToOne: false
             referencedRelation: "semesters"
@@ -86,39 +96,80 @@ export type Database = {
       }
       groups: {
         Row: {
+          course_id: number | null
+          description: string | null
           id: number
           name: string
         }
         Insert: {
+          course_id?: number | null
+          description?: string | null
           id?: number
           name: string
         }
         Update: {
+          course_id?: number | null
+          description?: string | null
           id?: number
           name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "groups_courses_fk"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lecturers: {
         Row: {
+          avatar_url: string | null
           email: string
           first_name: string
           id: number
           last_name: string
+          phone: string
+          program_id: number | null
+          user_id: string | null
         }
         Insert: {
+          avatar_url?: string | null
           email: string
           first_name: string
           id?: number
           last_name: string
+          phone?: string
+          program_id?: number | null
+          user_id?: string | null
         }
         Update: {
+          avatar_url?: string | null
           email?: string
           first_name?: string
           id?: number
           last_name?: string
+          phone?: string
+          program_id?: number | null
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lecturers_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lecturers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       programs: {
         Row: {
@@ -144,23 +195,26 @@ export type Database = {
       registrations: {
         Row: {
           course_id: number
-          grade: number
+          grade: number | null
           id: number
           reg_date: string
+          status: string
           student_id: number
         }
         Insert: {
           course_id: number
-          grade: number
+          grade?: number | null
           id?: number
-          reg_date: string
+          reg_date?: string
+          status?: string
           student_id: number
         }
         Update: {
           course_id?: number
-          grade?: number
+          grade?: number | null
           id?: number
           reg_date?: string
+          status?: string
           student_id?: number
         }
         Relationships: [
@@ -188,10 +242,10 @@ export type Database = {
           start_date: string
         }
         Insert: {
-          end_date: string
+          end_date?: string
           id: number
           name: string
-          start_date: string
+          start_date?: string
         }
         Update: {
           end_date?: string
@@ -203,37 +257,43 @@ export type Database = {
       }
       students: {
         Row: {
+          avatar_url: string | null
           date_of_birth: string
-          department_id: number
+          department_id: number | null
           email: string
           first_name: string
-          group_id: number
+          group_id: number | null
           id: number
           last_name: string
           phone: string
           program_id: number
+          user_id: string
         }
         Insert: {
+          avatar_url?: string | null
           date_of_birth: string
-          department_id: number
+          department_id?: number | null
           email: string
           first_name: string
-          group_id: number
+          group_id?: number | null
           id?: number
           last_name: string
           phone: string
           program_id: number
+          user_id: string
         }
         Update: {
+          avatar_url?: string | null
           date_of_birth?: string
-          department_id?: number
+          department_id?: number | null
           email?: string
           first_name?: string
-          group_id?: number
+          group_id?: number | null
           id?: number
           last_name?: string
           phone?: string
           program_id?: number
+          user_id?: string
         }
         Relationships: [
           {
@@ -257,7 +317,35 @@ export type Database = {
             referencedRelation: "programs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "students_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      user: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          role: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          role?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          role?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
