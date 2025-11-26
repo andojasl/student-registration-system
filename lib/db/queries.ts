@@ -52,41 +52,6 @@ export async function getCourses() {
   return data;
 }
 
-export async function getCourseById(courseId: number) {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("courses")
-    .select(`
-      *,
-      lecturers (
-        id,
-        first_name,
-        last_name,
-        email
-      ),
-      departments (
-        id,
-        name
-      ),
-      semesters (
-        id,
-        name,
-        start_date,
-        end_date
-      )
-    `)
-    .eq("id", courseId)
-    .single();
-
-  if (error) {
-    console.error("Error fetching course:", error);
-    return null;
-  }
-
-  return data;
-}
-
 export async function getGroups(): Promise<GroupWithStudents[]> {
   noStore();
   const supabase = await createClient();
@@ -388,3 +353,107 @@ export async function leaveGroupForCurrentStudent(
 
   return data as Student;
 }
+
+export async function getGroupsForCurrentStudent(): Promise<
+  GroupWithStudents[]
+> {
+  const supabase = await createClient();
+  const currentStudent = await getCurrentStudent();
+
+  if (!currentStudent) {
+    return [];
+  }
+
+  const groupId = (currentStudent as any).group_id as
+    | number
+    | null
+    | undefined;
+
+  if (!groupId) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("groups")
+    .select(`
+      *,
+      students (
+        id,
+        first_name,
+        last_name,
+        email
+      )
+    `)
+    .eq("id", groupId)
+    .order("name");
+
+  if (error) {
+    console.error("Error fetching groups for current student:", error);
+    return [];
+  }
+
+  return (data || []) as GroupWithStudents[];
+}
+export async function getCourseById(courseId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("courses")
+    .select(`
+      *,
+      lecturers (
+        id,
+        first_name,
+        last_name,
+        email
+      ),
+      departments (
+        id,
+        name
+      ),
+      semesters (
+        id,
+        name,
+        start_date,
+        end_date
+      )
+    `)
+    .eq("id", courseId as any)
+    .single();
+
+  if (error) {
+    console.error("Error fetching course:", error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function getGroupsByCourse(
+  courseId: number | string
+): Promise<GroupWithStudents[]> {
+  noStore();
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("groups")
+    .select(`
+      *,
+      students (
+        id,
+        first_name,
+        last_name,
+        email
+      )
+    `)
+    .eq("course_id", courseId as any)
+    .order("name");
+
+  if (error) {
+    console.error("Error fetching groups for course:", error);
+    return [];
+  }
+
+  return (data || []) as GroupWithStudents[];
+}
+

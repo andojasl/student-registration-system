@@ -1,5 +1,11 @@
 import { Suspense } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Users, BookOpen } from "lucide-react";
 import { getCoursesWithStudentCount } from "@/lib/db/queries";
@@ -39,47 +45,61 @@ async function CoursesContent() {
     <>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {courses.map((course, index) => (
-          <Card key={course.id} className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer">
-            <CardHeader className="pb-4">
-              <div className={`h-2 w-full rounded-t-lg ${courseColors[index % courseColors.length]} -mt-6 -mx-6 mb-4`} />
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg">{course.name}</CardTitle>
-                  <Badge variant="secondary" className="font-mono text-xs">
-                    {course.credits} Credits
-                  </Badge>
+          <Link
+            key={course.id}
+            href={`/courses/${course.id}`}
+            className="block"
+          >
+            <Card className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer">
+              <CardHeader className="pb-4">
+                <div
+                  className={`h-2 w-full rounded-t-lg ${
+                    courseColors[index % courseColors.length]
+                  } -mt-6 -mx-6 mb-4`}
+                />
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg">{course.name}</CardTitle>
+                    <Badge variant="secondary" className="font-mono text-xs">
+                      {course.credits} Credits
+                    </Badge>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <BookOpen className="mr-2 h-4 w-4" />
-                  {course.lecturers?.first_name} {course.lecturers?.last_name}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    {course.lecturers?.first_name}{" "}
+                    {course.lecturers?.last_name}
+                  </div>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {course.departments?.name || "N/A"}
+                  </div>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Users className="mr-2 h-4 w-4" />
+                    {course.student_count || 0} students
+                  </div>
                 </div>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {course.departments?.name || "N/A"}
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {course.description}
+                  </p>
                 </div>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Users className="mr-2 h-4 w-4" />
-                  {course.student_count || 0} students
-                </div>
-              </div>
-              <div className="pt-2 border-t">
-                <p className="text-xs text-muted-foreground line-clamp-2">
-                  {course.description}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 
       {courses.length === 0 && (
         <Card>
           <CardContent className="p-12 text-center">
-            <p className="text-muted-foreground">No courses found. Contact your administrator to enroll in courses.</p>
+            <p className="text-muted-foreground">
+              No courses found. Contact your administrator to enroll in
+              courses.
+            </p>
           </CardContent>
         </Card>
       )}
