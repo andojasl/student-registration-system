@@ -12,14 +12,20 @@ interface SidebarProps {
   role?: string | null;
 }
 
-const navigation = [
+const studentNavigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "My Courses", href: "/courses", icon: BookOpen },
   { name: "My Groups", href: "/groups", icon: Users },
 ];
 
+const lecturerNavigation = [
+  { name: "Dashboard", href: "/lecturer/dashboard", icon: LayoutDashboard },
+  { name: "Enrollments", href: "/lecturer/enrollments", icon: BookOpen },
+];
+
 export function Sidebar({ userEmail, role }: SidebarProps) {
   const pathname = usePathname();
+  const navigation = role === "lecturer" ? lecturerNavigation : studentNavigation;
 
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-background">
