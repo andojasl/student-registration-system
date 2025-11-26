@@ -26,7 +26,7 @@ export async function getStudentRegisteredCourses() {
 
   // Get all registrations for this student with course details
   const { data: registrations, error } = await supabase
-    .from('registrations')
+    .from('registrations' as any)
     .select(`
       id,
       reg_date,
@@ -43,7 +43,7 @@ export async function getStudentRegisteredCourses() {
       )
     `)
     .eq('student_id', student.id)
-    .order('reg_date', { ascending: false });
+    .order('reg_date', { ascending: false }) as any;
 
   if (error) {
     console.error('Error fetching student registrations:', error);
@@ -54,7 +54,7 @@ export async function getStudentRegisteredCourses() {
     return [];
   }
 
-  return registrations.map(reg => ({
+  return registrations.map((reg: any) => ({
     id: reg.id,
     reg_date: reg.reg_date,
     grade: reg.grade,
@@ -116,12 +116,12 @@ export async function getAvailableCoursesForStudent() {
 
   // Get student's existing registrations to check which courses they're already enrolled in
   const { data: existingRegistrations } = await supabase
-    .from('registrations')
+    .from('registrations' as any)
     .select('course_id, status')
-    .eq('student_id', student.id);
+    .eq('student_id', student.id) as any;
 
   const registeredCourseIds = new Set(
-    existingRegistrations?.map(reg => reg.course_id) || []
+    existingRegistrations?.map((reg: any) => reg.course_id) || []
   );
 
   return courses.map(course => ({
@@ -142,12 +142,12 @@ export async function getAvailableCoursesForStudent() {
 
 export async function requestCourseEnrollment(formData: FormData) {
   const supabase = await createClient();
-  const courseId = formData.get('courseId') as string;
+  const courseId = parseInt(formData.get('courseId') as string);
 
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
-    return redirect('/courses/browse?error=' + encodeURIComponent('Not authenticated'));
+    return redirect('/student/courses/browse?error=' + encodeURIComponent('Not authenticated'));
   }
 
   // Get student record
@@ -158,7 +158,7 @@ export async function requestCourseEnrollment(formData: FormData) {
     .single();
 
   if (!student) {
-    return redirect('/courses/browse?error=' + encodeURIComponent('Student record not found'));
+    return redirect('/student/courses/browse?error=' + encodeURIComponent('Student record not found'));
   }
 
   // Check if already registered
@@ -170,25 +170,25 @@ export async function requestCourseEnrollment(formData: FormData) {
     .single();
 
   if (existingReg) {
-    return redirect('/courses/browse?error=' + encodeURIComponent('Already registered for this course'));
+    return redirect('/student/courses/browse?error=' + encodeURIComponent('Already registered for this course'));
   }
 
   // Create pending registration
   const { error } = await supabase
-    .from('registrations')
+    .from('registrations' as any)
     .insert({
       student_id: student.id,
       course_id: courseId,
       status: 'pending',
       reg_date: new Date().toISOString(),
-    });
+    } as any);
 
   if (error) {
     console.error('Error creating registration:', error);
-    return redirect('/courses/browse?error=' + encodeURIComponent('Failed to request enrollment'));
+    return redirect('/student/courses/browse?error=' + encodeURIComponent('Failed to request enrollment'));
   }
 
-  revalidatePath('/courses');
-  revalidatePath('/courses/browse');
-  return redirect('/courses/browse?success=requested');
+  revalidatePath('/student/courses');
+  revalidatePath('/student/courses/browse');
+  return redirect('/student/courses/browse?success=requested');
 }

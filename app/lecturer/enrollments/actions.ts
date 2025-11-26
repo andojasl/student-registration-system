@@ -26,7 +26,7 @@ export async function getPendingEnrollments() {
 
   // Get all pending enrollment requests for courses taught by this lecturer
   const { data: enrollments, error } = await supabase
-    .from('registrations')
+    .from('registrations' as any)
     .select(`
       id,
       reg_date,
@@ -46,7 +46,7 @@ export async function getPendingEnrollments() {
     `)
     .eq('status', 'pending')
     .eq('courses.lecturer_id', lecturer.id)
-    .order('reg_date', { ascending: false });
+    .order('reg_date', { ascending: false }) as any;
 
   if (error) {
     console.error('Error fetching pending enrollments:', error);
@@ -57,7 +57,7 @@ export async function getPendingEnrollments() {
     return [];
   }
 
-  return enrollments.map(enrollment => ({
+  return enrollments.map((enrollment: any) => ({
     id: enrollment.id,
     reg_date: enrollment.reg_date,
     student_id: enrollment.student_id,
@@ -73,12 +73,12 @@ export async function getPendingEnrollments() {
 
 export async function approveEnrollment(formData: FormData) {
   const supabase = await createClient();
-  const registrationId = formData.get('registrationId') as string;
+  const registrationId = parseInt(formData.get('registrationId') as string, 10);
 
   // Update registration status to active
   const { error } = await supabase
-    .from('registrations')
-    .update({ status: 'active' })
+    .from('registrations' as any)
+    .update({ status: 'active' } as any)
     .eq('id', registrationId);
 
   if (error) {
@@ -92,11 +92,11 @@ export async function approveEnrollment(formData: FormData) {
 
 export async function rejectEnrollment(formData: FormData) {
   const supabase = await createClient();
-  const registrationId = formData.get('registrationId') as string;
+  const registrationId = parseInt(formData.get('registrationId') as string, 10);
 
   // Delete the registration
   const { error } = await supabase
-    .from('registrations')
+    .from('registrations' as any)
     .delete()
     .eq('id', registrationId);
 

@@ -14,10 +14,10 @@ export async function getPendingStudents() {
   }
 
   const { data: lecturer } = await supabase
-    .from('lecturers')
+    .from('lecturers' as any)
     .select('program_id')
     .eq('user_id', user.id)
-    .single();
+    .single() as any;
 
   if (!lecturer?.program_id) {
     return [];
@@ -26,7 +26,7 @@ export async function getPendingStudents() {
   // Get pending students for this lecturer's program
   // Using the correct foreign table filter syntax
   const { data: students, error } = await supabase
-    .from('students')
+    .from('students' as any)
     .select(`
       id,
       user_id,
@@ -40,7 +40,7 @@ export async function getPendingStudents() {
       user!inner(is_active, created_at)
     `)
     .eq('program_id', lecturer.program_id)
-    .eq('user.is_active', false);
+    .eq('user.is_active', false) as any;
 
   // Log error for debugging
   if (error) {
@@ -54,8 +54,8 @@ export async function getPendingStudents() {
 
   // Sort by created_at manually since ordering on foreign tables can be tricky
   return students
-    .sort((a, b) => new Date(b.user.created_at).getTime() - new Date(a.user.created_at).getTime())
-    .map(student => ({
+    .sort((a: any, b: any) => new Date(b.user.created_at).getTime() - new Date(a.user.created_at).getTime())
+    .map((student: any) => ({
       id: student.id,
       user_id: student.user_id,
       first_name: student.first_name,
@@ -74,7 +74,7 @@ export async function approveStudent(formData: FormData) {
 
   // Activate the user account
   const { error } = await supabase
-    .from('user')
+    .from('user' as any)
     .update({ is_active: true })
     .eq('id', userId);
 
@@ -89,7 +89,7 @@ export async function approveStudent(formData: FormData) {
 
 export async function rejectStudent(formData: FormData) {
   const supabase = await createClient();
-  const studentId = formData.get('studentId') as string;
+  const studentId = parseInt(formData.get('studentId') as string);
   const userId = formData.get('userId') as string;
 
   // Delete student record (this will cascade to user record due to foreign key)
@@ -104,7 +104,7 @@ export async function rejectStudent(formData: FormData) {
 
   // Delete user record
   const { error: userError } = await supabase
-    .from('user')
+    .from('user' as any)
     .delete()
     .eq('id', userId);
 

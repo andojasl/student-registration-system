@@ -28,9 +28,9 @@ interface SidebarProps {
 }
 
 const studentNavigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "My Courses", href: "/courses", icon: BookOpen },
-  { name: "My Groups", href: "/groups", icon: Users },
+  { name: "Dashboard", href: "/student", icon: LayoutDashboard },
+  { name: "My Courses", href: "/student/courses", icon: BookOpen },
+  { name: "My Groups", href: "/student/groups", icon: Users },
 ];
 
 const lecturerNavigation = [
