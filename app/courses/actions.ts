@@ -13,7 +13,6 @@ export async function getStudentRegisteredCourses() {
     return [];
   }
 
-  // Get student record
   const { data: student } = await supabase
     .from('students')
     .select('id')
@@ -24,7 +23,6 @@ export async function getStudentRegisteredCourses() {
     return [];
   }
 
-  // Get all registrations for this student with course details
   const { data: registrations, error } = await supabase
     .from('registrations' as any)
     .select(`
@@ -79,7 +77,6 @@ export async function getAvailableCoursesForStudent() {
     return [];
   }
 
-  // Get student record with program
   const { data: student } = await supabase
     .from('students')
     .select('id, program_id')
@@ -90,7 +87,6 @@ export async function getAvailableCoursesForStudent() {
     return [];
   }
 
-  // Get all courses for the student's program
   const { data: courses, error } = await supabase
     .from('courses')
     .select(`
@@ -114,7 +110,8 @@ export async function getAvailableCoursesForStudent() {
     return [];
   }
 
-  // Get student's existing registrations to check which courses they're already enrolled in
+  const filtered_courses = courses?.filter(course => course.semesters?.end_date > new Date().toISOString())
+
   const { data: existingRegistrations } = await supabase
     .from('registrations' as any)
     .select('course_id, status')
@@ -124,7 +121,7 @@ export async function getAvailableCoursesForStudent() {
     existingRegistrations?.map((reg: any) => reg.course_id) || []
   );
 
-  return courses.map(course => ({
+  return filtered_courses.map(course => ({
     id: course.id,
     name: course.name,
     credits: course.credits,
@@ -145,12 +142,10 @@ export async function requestCourseEnrollment(formData: FormData) {
   const courseId = parseInt(formData.get('courseId') as string);
 
   const { data: { user } } = await supabase.auth.getUser();
-  
   if (!user) {
     return redirect('/student/courses/browse?error=' + encodeURIComponent('Not authenticated'));
   }
 
-  // Get student record
   const { data: student } = await supabase
     .from('students')
     .select('id')
@@ -158,10 +153,29 @@ export async function requestCourseEnrollment(formData: FormData) {
     .single();
 
   if (!student) {
+    return redirect('/courses/browse?error=student_not_found');
+  }
+
+  const { data: course, error: courseError } = await supabase
+    .from('courses')
+    .select(`
+      id,
+      semesters(end_date)
+    `)
+    .eq('id', courseId)
+    .single();
+
+  if (courseError || !course?.semesters?.end_date) {
+    return redirect('/courses/browse?error=invalid_course');
+  }
+
+  const semesterEnd = new Date(course.semesters.end_date);
+  const now = new Date();
+
+  if (now > semesterEnd) {
     return redirect('/student/courses/browse?error=' + encodeURIComponent('Student record not found'));
   }
 
-  // Check if already registered
   const { data: existingReg } = await supabase
     .from('registrations')
     .select('id')
@@ -173,7 +187,6 @@ export async function requestCourseEnrollment(formData: FormData) {
     return redirect('/student/courses/browse?error=' + encodeURIComponent('Already registered for this course'));
   }
 
-  // Create pending registration
   const { error } = await supabase
     .from('registrations' as any)
     .insert({
