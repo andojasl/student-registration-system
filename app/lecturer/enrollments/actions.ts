@@ -108,3 +108,65 @@ export async function rejectEnrollment(formData: FormData) {
   revalidatePath('/lecturer/enrollments');
   return redirect('/lecturer/enrollments?success=rejected');
 }
+
+export async function getActiveEnrollmentsForGrading() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: lecturer } = await supabase
+    .from('lecturers')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (!lecturer) return [];
+
+  const { data, error } = await supabase
+    .from('registrations')
+    .select(`
+      id,
+      student_id,
+      course_id,
+      status,
+      grade,
+      students!inner(first_name, last_name, email),
+      courses!inner(name, lecturer_id)
+    `)
+    .neq('status', 'inactive')
+    .eq('courses.lecturer_id', lecturer.id);
+
+  if (error) return [];
+
+  return data.map(r => ({
+    id: r.id,
+    student_name: `${r.students.first_name} ${r.students.last_name}`,
+    student_email: r.students.email,
+    course_name: r.courses.name,
+    grade: r.grade,
+  }));
+}
+
+export async function submitGrade(formData: FormData) {
+  const supabase = await createClient();
+
+  const registrationId = formData.get('registrationId') as string;
+  const grade = formData.get('grade') as string;
+
+  const { error } = await supabase
+    .from('registrations')
+    .update({
+      grade,
+      status: 'complete',
+    })
+    .eq('id', registrationId);
+
+  if (error) {
+    return redirect('/lecturer/enrollments?error=grading_failed');
+  }
+
+  revalidatePath('/lecturer/enrollments');
+  return redirect('/lecturer/enrollments?success=graded');
+}
+
+

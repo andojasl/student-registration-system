@@ -1,7 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getPendingEnrollments, approveEnrollment, rejectEnrollment } from "./actions";
+import { 
+  getPendingEnrollments,
+  getActiveEnrollmentsForGrading,
+  approveEnrollment,
+  rejectEnrollment,
+  submitGrade
+} from "./actions";
 import { CheckCircle, XCircle, Clock, BookOpen, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getUser } from "@/app/auth/actions";
@@ -30,6 +36,7 @@ export default async function LecturerEnrollmentsPage() {
   }
 
   const pendingEnrollments = await getPendingEnrollments();
+  const activeEnrollments = await getActiveEnrollmentsForGrading();
 
   // Group enrollments by course
   const enrollmentsByCourse = pendingEnrollments.reduce((acc, enrollment) => {
@@ -148,6 +155,44 @@ export default async function LecturerEnrollmentsPage() {
             )}
           </CardContent>
         </Card>
+        <Card className="mt-8">
+  <CardHeader>
+    <CardTitle>Grade Students</CardTitle>
+    <CardDescription>Only active students can be graded</CardDescription>
+  </CardHeader>
+  <CardContent className="space-y-4">
+    {activeEnrollments.length === 0 ? (
+      <p className="text-muted-foreground">No students available for grading.</p>
+    ) : (
+      activeEnrollments.map((enrollment) => (
+        <form
+          key={enrollment.id}
+          action={submitGrade}
+          className="flex flex-col md:flex-row items-center gap-3 border p-3 rounded"
+        >
+          <input type="hidden" name="registrationId" value={enrollment.id} />
+
+          <div className="flex-1">
+            <p className="font-medium">{enrollment.student_name}</p>
+            <p className="text-sm text-muted-foreground">{enrollment.course_name}</p>
+          </div>
+
+          <input
+            type="text"
+            name="grade"
+            placeholder="Grade"
+            defaultValue={enrollment.grade ?? ""}
+            required
+            className="border rounded px-3 py-2 w-24"
+          />
+
+          <Button type="submit">Submit</Button>
+        </form>
+      ))
+    )}
+  </CardContent>
+</Card>
+
       </div>
     </div>
   );
