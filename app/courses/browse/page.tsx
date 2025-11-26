@@ -25,7 +25,7 @@ export default function BrowseCoursesPage({
   return (
     <div className="space-y-8">
       <div>
-        <Link href="/student/courses">
+        <Link href="/courses">
           <Button variant="ghost" size="sm" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to My Courses

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BookOpen, Users, LogOut, User, Settings, Moon, Sun, Monitor } from "lucide-react";
+import { LayoutDashboard, BookOpen, GraduationCap, Users, LogOut, User, Settings, Moon, Sun, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,7 @@ const studentNavigation = [
 const lecturerNavigation = [
   { name: "Dashboard", href: "/lecturer/dashboard", icon: LayoutDashboard },
   { name: "Enrollments", href: "/lecturer/enrollments", icon: BookOpen },
+  { name: "Courses", href: "/lecturer/courses", icon: GraduationCap },
 ];
 
 export function Sidebar({ userEmail, role, userName, avatarUrl }: SidebarProps) {
@@ -43,7 +44,6 @@ export function Sidebar({ userEmail, role, userName, avatarUrl }: SidebarProps) 
   const { setTheme } = useTheme();
   const navigation = role === "lecturer" ? lecturerNavigation : studentNavigation;
 
-  // Get user initials for avatar fallback
   const getInitials = (name?: string) => {
     if (!name) return "U";
     const parts = name.split(" ");
