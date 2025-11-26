@@ -139,7 +139,7 @@ async function GroupsContent() {
                 const isMember =
                   currentStudent &&
                   group.students?.some(
-                    (student: any) => student.id === currentStudent.id
+                    (student) => student.id === currentStudent.id
                   );
 
                 return (
@@ -178,7 +178,7 @@ async function GroupsContent() {
                           </h4>
                           {group.students && group.students.length > 0 ? (
                             <div className="space-y-3">
-                              {group.students.map((student: any) => (
+                              {group.students.map((student) => (
                                 <div
                                   key={student.id}
                                   className="flex items-center justify-between rounded-md border bg-background p-3 hover:bg-muted/50 transition-colors"
