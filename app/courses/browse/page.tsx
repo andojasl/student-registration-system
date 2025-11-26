@@ -51,9 +51,9 @@ async function BrowseCoursesContent() {
     <>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {courses.map((course, index) => (
-          <Card key={course.id} className="hover:shadow-lg transition-all duration-200">
+          <Card key={course.id} className="relative overflow-hidden hover:shadow-lg transition-all duration-200">
+            <div className={`absolute top-0 left-0 right-0 h-2 rounded-t-xl ${courseColors[index % courseColors.length]}`} />
             <CardHeader className="pb-4">
-              <div className={`h-2 w-full rounded-t-lg ${courseColors[index % courseColors.length]} -mt-6 -mx-6 mb-4`} />
               <div className="flex items-start justify-between">
                 <div className="space-y-1 flex-1">
                   <CardTitle className="text-lg">{course.name}</CardTitle>
