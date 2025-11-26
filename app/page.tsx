@@ -1,18 +1,12 @@
 import { Suspense } from "react";
-import { BookOpen, Users, Bell, GraduationCap, Building2 } from "lucide-react";
+import { BookOpen, Users, Bell } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { getCourses, getGroups, getDepartments, getLecturers } from "@/lib/db/queries";
-
-const recentActivity = [
-  { id: 1, message: "New assignment posted in Data Structures", time: "2 hours ago" },
-  { id: 2, message: "Group meeting scheduled for Project Management", time: "5 hours ago" },
-  { id: 3, message: "Grade posted for Algorithms Quiz", time: "1 day ago" },
-  { id: 4, message: "New announcement in Web Development", time: "1 day ago" },
-  { id: 5, message: "Joined new study group for Database Systems", time: "2 days ago" },
-  { id: 6, message: "Course material updated in Software Engineering", time: "3 days ago" },
-  { id: 7, message: "Upcoming deadline for Computer Networks project", time: "4 days ago" },
-];
+import {
+  getGroups,
+  getCurrentStudent,
+  getStudentRegistrations,
+} from "@/lib/db/queries";
 
 export default function Dashboard() {
   return (
@@ -32,43 +26,60 @@ export default function Dashboard() {
 }
 
 async function DashboardContent() {
-  const [courses, groups, departments, lecturers] = await Promise.all([
-    getCourses(),
+  const currentStudent = await getCurrentStudent();
+
+  const [groups, registrations] = await Promise.all([
     getGroups(),
-    getDepartments(),
-    getLecturers(),
+    currentStudent
+      ? (getStudentRegistrations(currentStudent.id) as Promise<any[]>)
+      : Promise.resolve([] as any[]),
   ]);
+
+  const myGroups = currentStudent
+    ? groups.filter((group: any) =>
+        group.students?.some((student: any) => student.id === currentStudent.id)
+      )
+    : [];
+
+  const enrolledCourseIds = new Set<number>();
+  registrations.forEach((registration: any) => {
+    const courseId = registration.courses?.id ?? registration.course_id;
+    if (typeof courseId === "number") {
+      enrolledCourseIds.add(courseId);
+    }
+  });
+
+  const totalCourses = enrolledCourseIds.size;
 
   const stats = [
     {
       title: "Total Courses",
-      value: courses.length,
+      value: totalCourses,
       icon: BookOpen,
       href: "/courses",
-      description: "Available courses",
+      description: "Courses you're enrolled in",
     },
     {
       title: "Study Groups",
-      value: groups.length,
+      value: myGroups.length,
       icon: Users,
       href: "/groups",
-      description: "Active groups",
-    },
-    {
-      title: "Departments",
-      value: departments.length,
-      icon: Building2,
-      href: "#",
-      description: "Academic departments",
-    },
-    {
-      title: "Lecturers",
-      value: lecturers.length,
-      icon: GraduationCap,
-      href: "#",
-      description: "Teaching staff",
+      description: "Groups you're a member of",
     },
   ];
+
+  const recentActivity = registrations
+    .slice()
+    .sort(
+      (a: any, b: any) =>
+        new Date(b.reg_date).getTime() - new Date(a.reg_date).getTime()
+    )
+    .slice(0, 10)
+    .map((registration: any) => ({
+      id: registration.id,
+      message: `Enrolled in ${registration.courses?.name ?? "a course"}`,
+      time: new Date(registration.reg_date).toLocaleString(),
+    }));
 
   return (
     <>
