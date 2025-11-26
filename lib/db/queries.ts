@@ -373,9 +373,13 @@ export async function leaveGroupForCurrentStudent(
     return null;
   }
 
+  const updatePayload: Partial<Tables<"students">> = {
+    group_id: null as unknown as number,
+  };
+
   const { data, error: updateError } = await supabase
     .from("students")
-    .update({ group_id: null as any })
+    .update(updatePayload)
     .eq("id", currentStudent.id)
     .eq("group_id", groupId)
     .select("*")
