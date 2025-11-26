@@ -53,14 +53,14 @@ export async function getStudentRegisteredCourses() {
   }
 
   return registrations.map((reg: any) => ({
-    id: reg.id,
-    course_id: reg.courses. id,
-    reg_date: reg.reg_date,
+    id: reg. id,
+    course_id: reg.courses.id,  // <-- VOEG DEZE REGEL TOE! 
+    reg_date: reg. reg_date,
     grade: reg.grade,
     status: reg.status as 'pending' | 'active' | 'complete',
     course_name: reg.courses.name,
     credits: reg.courses.credits,
-    description: reg.courses.description,
+    description: reg.courses. description,
     semester_name: reg.courses.semesters?. name,
     lecturer_name: reg.courses.lecturers 
       ? `${reg.courses.lecturers.first_name} ${reg.courses.lecturers.last_name}`
