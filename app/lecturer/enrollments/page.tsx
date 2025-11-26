@@ -32,7 +32,7 @@ export default async function LecturerEnrollmentsPage() {
   const pendingEnrollments = await getPendingEnrollments();
 
   // Group enrollments by course
-  const enrollmentsByCourse = pendingEnrollments.reduce((acc, enrollment) => {
+  const enrollmentsByCourse = pendingEnrollments.reduce((acc: Record<string, { course_name: string; course_credits: number; enrollments: typeof pendingEnrollments }>, enrollment: any) => {
     if (!acc[enrollment.course_id]) {
       acc[enrollment.course_id] = {
         course_name: enrollment.course_name,
@@ -74,7 +74,7 @@ export default async function LecturerEnrollmentsPage() {
               </div>
             ) : (
               <div className="space-y-6">
-                {Object.entries(enrollmentsByCourse).map(([courseId, courseData]) => (
+                {Object.entries(enrollmentsByCourse).map(([courseId, courseData]: [string, any]) => (
                   <div key={courseId} className="border rounded-lg p-4 bg-card">
                     <div className="flex items-center gap-3 mb-4 pb-3 border-b">
                       <BookOpen className="h-5 w-5 text-primary" />
@@ -90,7 +90,7 @@ export default async function LecturerEnrollmentsPage() {
                     </div>
                     
                     <div className="space-y-3">
-                      {courseData.enrollments.map((enrollment) => (
+                      {courseData.enrollments.map((enrollment: any) => (
                         <div
                           key={enrollment.id}
                           className="p-3 border rounded-lg bg-background hover:bg-accent/5 transition-colors"

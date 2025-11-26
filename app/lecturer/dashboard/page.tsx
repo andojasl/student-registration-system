@@ -60,7 +60,7 @@ export default async function LecturerDashboardPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {pendingStudents.map((student) => (
+                {pendingStudents.map((student: any) => (
                   <div
                     key={student.id}
                     className="p-4 border rounded-lg bg-card hover:bg-accent/5 transition-colors"
