@@ -37,7 +37,7 @@ export async function signUp(formData: FormData) {
 
   // Step 2: Create USER record with inactive status
   const { error: userError } = await supabase
-    .from('user')
+    .from('user' as any)
     .insert({
       id: authData.user.id,
       role: 'student',
@@ -51,7 +51,7 @@ export async function signUp(formData: FormData) {
 
   // Step 3: Create STUDENT record
   const { error: studentError } = await supabase
-    .from('students')
+    .from('students' as any)
     .insert({
       user_id: authData.user.id,
       first_name: firstName,
@@ -62,7 +62,7 @@ export async function signUp(formData: FormData) {
       program_id: programId,
       group_id: null,
       department_id: null,
-    });
+    } as any);
 
   if (studentError) {
     console.error('Error creating student record:', studentError);
@@ -89,10 +89,10 @@ export async function signIn(formData: FormData) {
 
   // Check if user is active
   const { data: userData } = await supabase
-    .from('user')
+    .from('user' as any)
     .select('is_active, role')
     .eq('id', data.user.id)
-    .single();
+    .single() as any;
 
   if (!userData?.is_active) {
     await supabase.auth.signOut();
@@ -105,7 +105,7 @@ export async function signIn(formData: FormData) {
   if (userData.role === 'lecturer') {
     return redirect('/lecturer/dashboard');
   } else {
-    return redirect('/');
+    return redirect('/student');
   }
 }
 
@@ -126,10 +126,10 @@ export async function getUser() {
 
   // Get user role and active status
   const { data: userData } = await supabase
-    .from('user')
+    .from('user' as any)
     .select('role, is_active')
     .eq('id', user.id)
-    .single();
+    .single() as any;
 
   return {
     ...user,

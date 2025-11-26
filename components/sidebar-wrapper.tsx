@@ -1,10 +1,22 @@
 import { Suspense } from "react";
 import { Sidebar } from "./sidebar";
 import { getUser } from "@/app/auth/actions";
+import { getCurrentUserProfile } from "@/lib/db/queries";
 
 async function SidebarContent() {
-  const user = await getUser();
-  return <Sidebar userEmail={user?.email} role={user?.role} />;
+  const [user, profile] = await Promise.all([
+    getUser(),
+    getCurrentUserProfile(),
+  ]);
+
+  return (
+    <Sidebar
+      userEmail={user?.email}
+      role={user?.role}
+      userName={profile ? `${profile.first_name} ${profile.last_name}` : undefined}
+      avatarUrl={profile?.avatar_url || undefined}
+    />
+  );
 }
 
 function SidebarSkeleton() {

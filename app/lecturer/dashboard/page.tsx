@@ -31,7 +31,7 @@ export default async function LecturerDashboardPage() {
   const pendingStudents = await getPendingStudents();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4 md:p-8">
+    <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Lecturer Dashboard</h1>
@@ -60,7 +60,7 @@ export default async function LecturerDashboardPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {pendingStudents.map((student) => (
+                {pendingStudents.map((student: any) => (
                   <div
                     key={student.id}
                     className="p-4 border rounded-lg bg-card hover:bg-accent/5 transition-colors"
