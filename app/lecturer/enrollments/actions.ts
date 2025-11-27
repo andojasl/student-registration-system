@@ -87,6 +87,7 @@ export async function approveEnrollment(formData: FormData) {
   }
 
   revalidatePath('/lecturer/enrollments');
+  revalidatePath('/student/schedules');
   return redirect('/lecturer/enrollments?success=approved');
 }
 
