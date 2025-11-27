@@ -15,15 +15,16 @@ import {
   UserMinus,
 } from "lucide-react";
 import Link from "next/link";
-import { getCourseGroups, joinCourseGroup, leaveCourseGroup } from "@/app/courses/actions";
+import { getCourseGroups, joinCourseGroup, leaveCourseGroup } from "@/app/student/courses/actions";
 import { notFound } from "next/navigation";
 
 export default async function CourseGroupsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const courseId = parseInt(params.id);
+  const { id } = await params;
+  const courseId = parseInt(id);
   const groups = await getCourseGroups(courseId);
 
   if (!groups) {
@@ -67,7 +68,7 @@ function GroupsContent({
           <CardContent className="p-12 text-center space-y-4">
             <Users className="h-12 w-12 mx-auto text-muted-foreground" />
             <p className="text-muted-foreground text-lg">
-              No study groups available for this course yet. 
+              No study groups available for this course yet.
             </p>
           </CardContent>
         </Card>
@@ -103,7 +104,7 @@ function GroupsContent({
                               {student.first_name} {student.last_name}
                             </p>
                             <p className="text-muted-foreground truncate">
-                              {student. email}
+                              {student.email}
                             </p>
                           </div>
                         </div>
@@ -116,7 +117,7 @@ function GroupsContent({
                   </div>
                 </div>
 
-                {group.is_member ?  (
+                {group.is_member ? (
                   <form action={async (formData) => {
                     const groupId = formData.get("groupId");
                     await leaveCourseGroup(parseInt(groupId as string));
@@ -160,7 +161,7 @@ function GroupsContent({
 function GroupsFallback() {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 6 }). map((_, index) => (
+      {Array.from({ length: 6 }).map((_, index) => (
         <Card key={index}>
           <CardContent className="space-y-3 py-6">
             <div className="h-6 w-32 rounded bg-muted animate-pulse" />

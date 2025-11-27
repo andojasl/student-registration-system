@@ -18,15 +18,16 @@ import {
   Layers,
 } from "lucide-react";
 import Link from "next/link";
-import { getStudentCourseDetails } from "@/app/courses/actions";
+import { getStudentCourseDetails } from "@/app/student/courses/actions";
 import { notFound } from "next/navigation";
 
 export default async function CourseDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const courseId = parseInt(params.id);
+  const { id } = await params;
+  const courseId = parseInt(id);
   const course = await getStudentCourseDetails(courseId);
 
   if (!course) {
@@ -116,9 +117,9 @@ export default async function CourseDetailPage({
                     <span className="font-semibold text-sm">Semester Dates</span>
                   </div>
                   <p className="text-sm ml-6">
-                    {new Date(course.semesters. start_date).toLocaleDateString()}{" "}
+                    {new Date(course.semesters.start_date).toLocaleDateString()}{" "}
                     -{" "}
-                    {new Date(course.semesters. end_date).toLocaleDateString()}
+                    {new Date(course.semesters.end_date).toLocaleDateString()}
                   </p>
                 </div>
               )}
