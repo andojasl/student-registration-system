@@ -62,7 +62,6 @@ export default function StudentCoursesPage() {
             Manage and view all your enrolled courses
           </p>
         </div>
-        {/* hier terug naar student/courses/browse */}
         <Link href="/student/courses/browse">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
@@ -91,7 +90,6 @@ async function CoursesContent() {
           return (
             <Link
               key={registration.id}
-              // ook hier student/courses gebruiken
               href={`/student/courses/${registration.course_id}`}
               className="group"
             >
