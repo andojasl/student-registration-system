@@ -10,15 +10,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Users, UserPlus, UserMinus } from "lucide-react";
 import Link from "next/link";
-import { getCourseGroups, joinCourseGroup, leaveCourseGroup } from "@/app/courses/actions";
+import { getCourseGroups, joinCourseGroup, leaveCourseGroup } from "@/app/student/courses/actions";
 import { notFound } from "next/navigation";
 
 export default async function CourseGroupsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const courseId = parseInt(params.id);
+  const { id } = await params;
+  const courseId = parseInt(id);
   const groups = await getCourseGroups(courseId);
 
   if (!groups) {
@@ -28,7 +29,7 @@ export default async function CourseGroupsPage({
   return (
     <div className="space-y-8">
       <div>
-        <Link href={`/courses/${courseId}`}>
+        <Link href={`/student/courses/${courseId}`}>
           <Button variant="ghost" size="sm" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Course

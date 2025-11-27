@@ -16,8 +16,9 @@ import {
   CheckCircle,
   Clock,
   GraduationCap,
+  ChevronRight,
 } from "lucide-react";
-import { getStudentRegisteredCourses } from "@/app/courses/actions";
+import { getStudentRegisteredCourses } from "@/app/student/courses/actions";
 import Link from "next/link";
 
 const courseColors = [
@@ -88,34 +89,37 @@ async function CoursesContent() {
           const StatusIcon = statusConfig[statusKey].icon;
 
           return (
-            <Card
+            <Link
               key={registration.id}
-              className="relative overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer"
+              href={`/student/courses/${registration.course_id}`}
+              className="group"
             >
-              <div
-                className={`absolute top-0 left-0 right-0 h-2 rounded-t-xl ${
-                  courseColors[index % courseColors.length]
-                }`}
-              />
-              <CardHeader className="pb-4 w-full">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <CardTitle className="text-lg">
-                      {registration.course_name}
-                    </CardTitle>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="secondary" className="font-mono text-xs">
-                        {registration.credits} Credits
-                      </Badge>
-                      <Badge className={statusConfig[statusKey].className}>
-                        <StatusIcon className="mr-1 h-3 w-3" />
-                        {statusConfig[statusKey].label}
-                      </Badge>
+              <Card className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer h-full overflow-hidden pt-0">
+                <div
+                  className={`h-2 w-full ${
+                    courseColors[index % courseColors.length]
+                  }`}
+                />
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1 flex-1">
+                      <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                        {registration.course_name}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant="secondary" className="font-mono text-xs">
+                          {registration.credits} Credits
+                        </Badge>
+                        <Badge className={statusConfig[statusKey].className}>
+                          <StatusIcon className="mr-1 h-3 w-3" />
+                          {statusConfig[statusKey].label}
+                        </Badge>
+                      </div>
                     </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors mt-1" />
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </CardHeader>
+                <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center text-sm text-muted-foreground">
                     <BookOpen className="mr-2 h-4 w-4" />
@@ -156,6 +160,7 @@ async function CoursesContent() {
                 </div>
               </CardContent>
             </Card>
+          </Link>
           );
         })}
       </div>

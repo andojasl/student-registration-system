@@ -152,7 +152,7 @@ export async function requestCourseEnrollment(formData: FormData) {
 
   if (!user) {
     return redirect(
-      "/courses/browse?error=" + encodeURIComponent("Not authenticated")
+      "/student/courses/browse?error=" + encodeURIComponent("Not authenticated")
     );
   }
 
@@ -164,7 +164,7 @@ export async function requestCourseEnrollment(formData: FormData) {
 
   if (!student) {
     return redirect(
-      "/courses/browse?error=" + encodeURIComponent("student_not_found")
+      "/student/courses/browse?error=" + encodeURIComponent("student_not_found")
     );
   }
 
@@ -181,7 +181,7 @@ export async function requestCourseEnrollment(formData: FormData) {
 
   if (courseError || !course?.semesters?.end_date) {
     return redirect(
-      "/courses/browse?error=" + encodeURIComponent("invalid_course")
+      "/student/courses/browse?error=" + encodeURIComponent("invalid_course")
     );
   }
 
@@ -190,7 +190,7 @@ export async function requestCourseEnrollment(formData: FormData) {
 
   if (now > semesterEnd) {
     return redirect(
-      "/courses/browse?error=" +
+      "/student/courses/browse?error=" +
         encodeURIComponent("Course is no longer available")
     );
   }
@@ -204,7 +204,7 @@ export async function requestCourseEnrollment(formData: FormData) {
 
   if (existingReg) {
     return redirect(
-      "/courses/browse?error=" +
+      "/student/courses/browse?error=" +
         encodeURIComponent("Already registered for this course")
     );
   }
@@ -219,20 +219,43 @@ export async function requestCourseEnrollment(formData: FormData) {
   if (error) {
     console.error("Error creating registration:", error);
     return redirect(
-      "/courses/browse?error=" +
+      "/student/courses/browse?error=" +
         encodeURIComponent("Failed to request enrollment")
     );
   }
 
-  revalidatePath("/courses");
-  revalidatePath("/courses/browse");
+  revalidatePath("/student/courses");
+  revalidatePath("/student/courses/browse");
   return redirect(
-    "/courses/browse?success=" + encodeURIComponent("requested")
+    "/student/courses/browse?success=" + encodeURIComponent("requested")
   );
 }
 
 export async function getStudentCourseDetails(courseId: number) {
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data: student } = await supabase
+    .from("students")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!student) return null;
+
+  const { data: registration } = await supabase
+    .from("registrations")
+    .select("id")
+    .eq("student_id", student.id)
+    .eq("course_id", courseId)
+    .maybeSingle();
+
+  if (!registration) return null;
 
   const { data: course, error } = await supabase
     .from("courses")
@@ -316,7 +339,7 @@ export async function joinCourseGroup(groupId: number) {
 
   if (!user) {
     return redirect(
-      "/courses?error=" + encodeURIComponent("Not authenticated")
+      "/student/courses?error=" + encodeURIComponent("Not authenticated")
     );
   }
 
@@ -328,7 +351,7 @@ export async function joinCourseGroup(groupId: number) {
 
   if (!student) {
     return redirect(
-      "/courses?error=" + encodeURIComponent("Student not found")
+      "/student/courses?error=" + encodeURIComponent("Student not found")
     );
   }
 
@@ -340,13 +363,13 @@ export async function joinCourseGroup(groupId: number) {
   if (error) {
     console.error("Error joining group:", error);
     return redirect(
-      "/courses?error=" + encodeURIComponent("Failed to join group")
+      "/student/courses?error=" + encodeURIComponent("Failed to join group")
     );
   }
 
-  revalidatePath("/courses");
+  revalidatePath("/student/courses");
   return redirect(
-    "/courses?success=" + encodeURIComponent("group_joined")
+    "/student/courses?success=" + encodeURIComponent("group_joined")
   );
 }
 
@@ -359,7 +382,7 @@ export async function leaveCourseGroup(groupId: number) {
 
   if (!user) {
     return redirect(
-      "/courses?error=" + encodeURIComponent("Not authenticated")
+      "/student/courses?error=" + encodeURIComponent("Not authenticated")
     );
   }
 
@@ -371,7 +394,7 @@ export async function leaveCourseGroup(groupId: number) {
 
   if (!student) {
     return redirect(
-      "/courses?error=" + encodeURIComponent("Student not found")
+      "/student/courses?error=" + encodeURIComponent("Student not found")
     );
   }
 
@@ -384,12 +407,12 @@ export async function leaveCourseGroup(groupId: number) {
   if (error) {
     console.error("Error leaving group:", error);
     return redirect(
-      "/courses?error=" + encodeURIComponent("Failed to leave group")
+      "/student/courses?error=" + encodeURIComponent("Failed to leave group")
     );
   }
 
-  revalidatePath("/courses");
+  revalidatePath("/student/courses");
   return redirect(
-    "/courses?success=" + encodeURIComponent("group_left")
+    "/student/courses?success=" + encodeURIComponent("group_left")
   );
 }
