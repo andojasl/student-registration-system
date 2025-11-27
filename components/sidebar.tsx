@@ -42,7 +42,7 @@ const lecturerNavigation = [
 
 export function Sidebar({ userEmail, role, userName, avatarUrl }: SidebarProps) {
   const pathname = usePathname();
-  const { setTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const navigation = role === "lecturer" ? lecturerNavigation : studentNavigation;
 
   const getInitials = (name?: string) => {
@@ -51,12 +51,14 @@ export function Sidebar({ userEmail, role, userName, avatarUrl }: SidebarProps) 
     return parts.map(p => p[0]).join("").toUpperCase().slice(0, 2);
   };
 
+  const logoSrc = resolvedTheme === 'light' ? '/logo-light.svg' : '/logo-dark.svg';
+
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-background">
       {/* Header section */}
       <div className="flex h-16 items-center gap-3 border-b px-6">
         <Image
-          src="/logo.svg"
+          src={logoSrc}
           alt="Logo"
           width={32}
           height={32}

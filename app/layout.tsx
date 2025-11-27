@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "Student Portal",
   description: "Student registration and course management system",
   icons: {
-    icon: "/logo.svg",
+    icon: "/logo-dark.svg",
   },
 };
 
