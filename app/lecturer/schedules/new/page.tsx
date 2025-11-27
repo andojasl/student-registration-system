@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
-export default async function NewSchedulePage({ searchParams }: { searchParams: { error?: string } }) {
+export default async function NewSchedulePage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   // Auth check
   const user = await getUser();
   if (!user || user.role !== 'lecturer') {
@@ -16,6 +16,9 @@ export default async function NewSchedulePage({ searchParams }: { searchParams: 
   // Fetch data
   const courses = await getLecturerCourses();
   const rooms = await getRooms();
+
+  // Await searchParams in Next.js 16+
+  const params = await searchParams;
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -33,10 +36,10 @@ export default async function NewSchedulePage({ searchParams }: { searchParams: 
         </div>
 
         {/* Error Message */}
-        {searchParams.error && (
+        {params.error && (
           <div className="mb-6 rounded-lg border border-red-300 bg-red-50 dark:bg-red-900/20 p-4">
             <p className="text-sm text-red-800 dark:text-red-200">
-              {decodeURIComponent(searchParams.error)}
+              {decodeURIComponent(params.error)}
             </p>
           </div>
         )}

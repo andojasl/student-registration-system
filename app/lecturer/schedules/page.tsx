@@ -8,7 +8,7 @@ import Link from "next/link";
 import WeeklyCalendar from "@/components/schedules/weekly-calendar";
 import ScheduleCard from "@/components/schedules/schedule-card";
 
-export default async function LecturerSchedulesPage({ searchParams }: { searchParams: { success?: string; error?: string } }) {
+export default async function LecturerSchedulesPage({ searchParams }: { searchParams: Promise<{ success?: string; error?: string }> }) {
   // Auth check
   const user = await getUser();
   if (!user || user.role !== 'lecturer') {
@@ -17,6 +17,9 @@ export default async function LecturerSchedulesPage({ searchParams }: { searchPa
 
   // Fetch data
   const schedules = await getSchedulesByLecturer();
+
+  // Await searchParams in Next.js 16+
+  const params = await searchParams;
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -36,20 +39,20 @@ export default async function LecturerSchedulesPage({ searchParams }: { searchPa
         </div>
 
         {/* Success/Error Messages */}
-        {searchParams.success && (
+        {params.success && (
           <div className="mb-6 rounded-lg border border-green-300 bg-green-50 dark:bg-green-900/20 p-4">
             <p className="text-sm text-green-800 dark:text-green-200">
-              {searchParams.success === 'created' && 'Schedule created successfully!'}
-              {searchParams.success === 'updated' && 'Schedule updated successfully!'}
-              {searchParams.success === 'deleted' && 'Schedule deleted successfully!'}
+              {params.success === 'created' && 'Schedule created successfully!'}
+              {params.success === 'updated' && 'Schedule updated successfully!'}
+              {params.success === 'deleted' && 'Schedule deleted successfully!'}
             </p>
           </div>
         )}
 
-        {searchParams.error && (
+        {params.error && (
           <div className="mb-6 rounded-lg border border-red-300 bg-red-50 dark:bg-red-900/20 p-4">
             <p className="text-sm text-red-800 dark:text-red-200">
-              {decodeURIComponent(searchParams.error)}
+              {decodeURIComponent(params.error)}
             </p>
           </div>
         )}
@@ -59,9 +62,6 @@ export default async function LecturerSchedulesPage({ searchParams }: { searchPa
           <WeeklyCalendar
             schedules={schedules}
             role="lecturer"
-            onScheduleClick={(scheduleId) => {
-              // Note: Client-side navigation handled by the component
-            }}
           />
         </div>
 

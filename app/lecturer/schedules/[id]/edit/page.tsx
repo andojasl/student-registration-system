@@ -10,8 +10,8 @@ export default async function EditSchedulePage({
   params,
   searchParams
 }: {
-  params: { id: string };
-  searchParams: { error?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   // Auth check
   const user = await getUser();
@@ -19,7 +19,9 @@ export default async function EditSchedulePage({
     redirect('/auth/login');
   }
 
-  const scheduleId = parseInt(params.id);
+  // Await params in Next.js 16+
+  const { id } = await params;
+  const scheduleId = parseInt(id);
 
   // Fetch data
   const schedule = await getScheduleById(scheduleId);
@@ -30,6 +32,9 @@ export default async function EditSchedulePage({
   if (!schedule) {
     redirect('/lecturer/schedules?error=' + encodeURIComponent('Schedule not found or unauthorized'));
   }
+
+  // Await searchParams in Next.js 16+
+  const searchParamsData = await searchParams;
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -47,10 +52,10 @@ export default async function EditSchedulePage({
         </div>
 
         {/* Error Message */}
-        {searchParams.error && (
+        {searchParamsData.error && (
           <div className="mb-6 rounded-lg border border-red-300 bg-red-50 dark:bg-red-900/20 p-4">
             <p className="text-sm text-red-800 dark:text-red-200">
-              {decodeURIComponent(searchParams.error)}
+              {decodeURIComponent(searchParamsData.error)}
             </p>
           </div>
         )}

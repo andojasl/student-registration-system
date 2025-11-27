@@ -27,7 +27,6 @@ type Schedule = {
 interface WeeklyCalendarProps {
   schedules: Schedule[];
   role: 'lecturer' | 'student';
-  onScheduleClick?: (scheduleId: number) => void;
 }
 
 // =====================================================
@@ -65,7 +64,7 @@ const COURSE_COLORS = [
 // COMPONENT
 // =====================================================
 
-export default function WeeklyCalendar({ schedules, role, onScheduleClick }: WeeklyCalendarProps) {
+export default function WeeklyCalendar({ schedules, role }: WeeklyCalendarProps) {
   const [currentDay, setCurrentDay] = useState(1); // For mobile view
   const [viewMode, setViewMode] = useState<'week' | 'day'>('week');
 
@@ -219,9 +218,8 @@ export default function WeeklyCalendar({ schedules, role, onScheduleClick }: Wee
                         return (
                           <div
                             key={schedule.id}
-                            className={`absolute left-0 right-0 mx-1 rounded border-l-4 p-2 cursor-pointer transition-all hover:shadow-md ${colorClass}`}
+                            className={`absolute left-0 right-0 mx-1 rounded border-l-4 p-2 transition-all hover:shadow-md ${colorClass}`}
                             style={style}
-                            onClick={() => onScheduleClick?.(schedule.id)}
                           >
                             <div className="text-xs font-semibold truncate mb-1">
                               {schedule.course_name}

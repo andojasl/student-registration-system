@@ -8,14 +8,16 @@ import Link from "next/link";
 
 const DAY_NAMES = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-export default async function DeleteSchedulePage({ params }: { params: { id: string } }) {
+export default async function DeleteSchedulePage({ params }: { params: Promise<{ id: string }> }) {
   // Auth check
   const user = await getUser();
   if (!user || user.role !== 'lecturer') {
     redirect('/auth/login');
   }
 
-  const scheduleId = parseInt(params.id);
+  // Await params in Next.js 16+
+  const { id } = await params;
+  const scheduleId = parseInt(id);
 
   // Fetch data
   const schedule = await getScheduleById(scheduleId);
