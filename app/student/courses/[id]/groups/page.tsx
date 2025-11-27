@@ -12,6 +12,41 @@ import { ArrowLeft, Users, UserPlus, UserMinus } from "lucide-react";
 import Link from "next/link";
 import { getCourseGroups, joinCourseGroup, leaveCourseGroup } from "@/app/student/courses/actions";
 import { notFound } from "next/navigation";
+import { revalidatePath } from "next/cache";
+
+async function joinGroupAction(formData: FormData) {
+  "use server";
+  const groupIdValue = formData.get("groupId");
+  const courseIdValue = formData.get("courseId");
+  const groupId = typeof groupIdValue === "string" ? parseInt(groupIdValue, 10) : NaN;
+  const courseId = typeof courseIdValue === "string" ? parseInt(courseIdValue, 10) : NaN;
+
+  if (!groupId || Number.isNaN(groupId)) {
+    return;
+  }
+
+  await joinCourseGroup(groupId);
+  if (!Number.isNaN(courseId)) {
+    revalidatePath(`/student/courses/${courseId}/groups`);
+  }
+}
+
+async function leaveGroupAction(formData: FormData) {
+  "use server";
+  const groupIdValue = formData.get("groupId");
+  const courseIdValue = formData.get("courseId");
+  const groupId = typeof groupIdValue === "string" ? parseInt(groupIdValue, 10) : NaN;
+  const courseId = typeof courseIdValue === "string" ? parseInt(courseIdValue, 10) : NaN;
+
+  if (!groupId || Number.isNaN(groupId)) {
+    return;
+  }
+
+  await leaveCourseGroup(groupId);
+  if (!Number.isNaN(courseId)) {
+    revalidatePath(`/student/courses/${courseId}/groups`);
+  }
+}
 
 export default async function CourseGroupsPage({
   params,
@@ -116,7 +151,10 @@ function GroupsContent({
                 </div>
 
                 {group.is_member ? (
-                  <form action={leaveCourseGroup} className="w-full">
+                  <form
+                    action={leaveGroupAction}
+                    className="w-full"
+                  >
                     <input type="hidden" name="groupId" value={group.id} />
                     <input type="hidden" name="courseId" value={courseId} />
                     <Button
@@ -130,7 +168,10 @@ function GroupsContent({
                     </Button>
                   </form>
                 ) : (
-                  <form action={joinCourseGroup} className="w-full">
+                  <form
+                    action={joinGroupAction}
+                    className="w-full"
+                  >
                     <input type="hidden" name="groupId" value={group.id} />
                     <input type="hidden" name="courseId" value={courseId} />
                     <Button type="submit" className="w-full" size="sm">
