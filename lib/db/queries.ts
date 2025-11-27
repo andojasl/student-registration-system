@@ -17,6 +17,10 @@ export type GroupWithStudents = Group & {
     last_name: string;
     email: string;
   }[];
+  course?: {
+    id: number;
+    name: string;
+  } | null;
 };
 
 export async function getCourses() {
@@ -65,6 +69,10 @@ export async function getGroups(): Promise<GroupWithStudents[]> {
         first_name,
         last_name,
         email
+      ),
+      course:courses (
+        id,
+        name
       )
     `)
     .order("name");

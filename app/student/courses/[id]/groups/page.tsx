@@ -12,6 +12,41 @@ import { ArrowLeft, Users, UserPlus, UserMinus } from "lucide-react";
 import Link from "next/link";
 import { getCourseGroups, joinCourseGroup, leaveCourseGroup } from "@/app/student/courses/actions";
 import { notFound } from "next/navigation";
+import { revalidatePath } from "next/cache";
+
+async function joinGroupAction(formData: FormData) {
+  "use server";
+  const groupIdValue = formData.get("groupId");
+  const courseIdValue = formData.get("courseId");
+  const groupId = typeof groupIdValue === "string" ? parseInt(groupIdValue, 10) : NaN;
+  const courseId = typeof courseIdValue === "string" ? parseInt(courseIdValue, 10) : NaN;
+
+  if (!groupId || Number.isNaN(groupId)) {
+    return;
+  }
+
+  await joinCourseGroup(groupId);
+  if (!Number.isNaN(courseId)) {
+    revalidatePath(`/student/courses/${courseId}/groups`);
+  }
+}
+
+async function leaveGroupAction(formData: FormData) {
+  "use server";
+  const groupIdValue = formData.get("groupId");
+  const courseIdValue = formData.get("courseId");
+  const groupId = typeof groupIdValue === "string" ? parseInt(groupIdValue, 10) : NaN;
+  const courseId = typeof courseIdValue === "string" ? parseInt(courseIdValue, 10) : NaN;
+
+  if (!groupId || Number.isNaN(groupId)) {
+    return;
+  }
+
+  await leaveCourseGroup(groupId);
+  if (!Number.isNaN(courseId)) {
+    revalidatePath(`/student/courses/${courseId}/groups`);
+  }
+}
 
 export default async function CourseGroupsPage({
   params,
@@ -117,13 +152,11 @@ function GroupsContent({
 
                 {group.is_member ? (
                   <form
-                    action={async (formData) => {
-                      const groupId = formData.get("groupId");
-                      await leaveCourseGroup(parseInt(groupId as string));
-                    }}
+                    action={leaveGroupAction}
                     className="w-full"
                   >
                     <input type="hidden" name="groupId" value={group.id} />
+                    <input type="hidden" name="courseId" value={courseId} />
                     <Button
                       type="submit"
                       variant="outline"
@@ -136,13 +169,11 @@ function GroupsContent({
                   </form>
                 ) : (
                   <form
-                    action={async (formData) => {
-                      const groupId = formData.get("groupId");
-                      await joinCourseGroup(parseInt(groupId as string));
-                    }}
+                    action={joinGroupAction}
                     className="w-full"
                   >
                     <input type="hidden" name="groupId" value={group.id} />
+                    <input type="hidden" name="courseId" value={courseId} />
                     <Button type="submit" className="w-full" size="sm">
                       <UserPlus className="mr-2 h-4 w-4" />
                       Join Group
