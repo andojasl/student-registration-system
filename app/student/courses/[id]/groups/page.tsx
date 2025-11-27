@@ -25,7 +25,7 @@ async function joinGroupAction(formData: FormData) {
     return;
   }
 
-  await joinCourseGroup(groupId);
+  await joinCourseGroup(formData);
   if (!Number.isNaN(courseId)) {
     revalidatePath(`/student/courses/${courseId}/groups`);
   }
@@ -42,7 +42,7 @@ async function leaveGroupAction(formData: FormData) {
     return;
   }
 
-  await leaveCourseGroup(groupId);
+  await leaveCourseGroup(formData);
   if (!Number.isNaN(courseId)) {
     revalidatePath(`/student/courses/${courseId}/groups`);
   }
