@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -18,7 +17,7 @@ import {
   GraduationCap,
   ChevronRight,
 } from "lucide-react";
-import { getStudentRegisteredCourses } from "@/app/student/courses/actions";
+import { getStudentRegisteredCourses } from "@/app/courses/actions";
 import Link from "next/link";
 
 const courseColors = [
@@ -63,6 +62,7 @@ export default function StudentCoursesPage() {
             Manage and view all your enrolled courses
           </p>
         </div>
+        {/* hier terug naar student/courses/browse */}
         <Link href="/student/courses/browse">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
@@ -91,16 +91,17 @@ async function CoursesContent() {
           return (
             <Link
               key={registration.id}
+              // ook hier student/courses gebruiken
               href={`/student/courses/${registration.course_id}`}
               className="group"
             >
-              <Card className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer h-full overflow-hidden">
-                <div
-                  className={`h-2 w-full ${
-                    courseColors[index % courseColors.length]
-                  }`}
-                />
+              <Card className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer h-full">
                 <CardHeader className="pb-4">
+                  <div
+                    className={`h-2 w-full rounded-t-lg ${
+                      courseColors[index % courseColors.length]
+                    } -mt-6 -mx-6 mb-4`}
+                  />
                   <div className="flex items-start justify-between">
                     <div className="space-y-1 flex-1">
                       <CardTitle className="text-lg group-hover:text-primary transition-colors">
@@ -120,47 +121,47 @@ async function CoursesContent() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    {registration.lecturer_name}
-                  </div>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {registration.department_name || "N/A"}
-                  </div>
-                  {registration.semester_name && (
+                  <div className="space-y-2">
                     <div className="flex items-center text-sm text-muted-foreground">
-                      <Users className="mr-2 h-4 w-4" />
-                      {registration.semester_name}
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      {registration.lecturer_name}
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {registration.department_name || "N/A"}
+                    </div>
+                    {registration.semester_name && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Users className="mr-2 h-4 w-4" />
+                        {registration.semester_name}
+                      </div>
+                    )}
+                  </div>
+
+                  {registration.grade && (
+                    <div className="pt-2 border-t">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Final Grade:</span>
+                        <span className="text-lg font-bold">
+                          {registration.grade}
+                        </span>
+                      </div>
                     </div>
                   )}
-                </div>
 
-                {registration.grade && (
                   <div className="pt-2 border-t">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Final Grade:</span>
-                      <span className="text-lg font-bold">
-                        {registration.grade}
-                      </span>
-                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {registration.description}
+                    </p>
                   </div>
-                )}
 
-                <div className="pt-2 border-t">
-                  <p className="text-xs text-muted-foreground line-clamp-2">
-                    {registration.description}
-                  </p>
-                </div>
-
-                <div className="text-xs text-muted-foreground">
-                  Registered:{" "}
-                  {new Date(registration.reg_date).toLocaleDateString()}
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+                  <div className="text-xs text-muted-foreground">
+                    Registered:{" "}
+                    {new Date(registration.reg_date).toLocaleDateString()}
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           );
         })}
       </div>
@@ -200,5 +201,3 @@ function CoursesFallback() {
     </div>
   );
 }
-
-

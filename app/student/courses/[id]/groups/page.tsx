@@ -8,12 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowLeft,
-  Users,
-  UserPlus,
-  UserMinus,
-} from "lucide-react";
+import { ArrowLeft, Users, UserPlus, UserMinus } from "lucide-react";
 import Link from "next/link";
 import { getCourseGroups, joinCourseGroup, leaveCourseGroup } from "@/app/student/courses/actions";
 import { notFound } from "next/navigation";
@@ -75,7 +70,10 @@ function GroupsContent({
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {groups.map((group) => (
-            <Card key={group.id} className="hover:shadow-lg transition-all duration-200">
+            <Card
+              key={group.id}
+              className="hover:shadow-lg transition-all duration-200"
+            >
               <CardHeader>
                 <CardTitle className="text-lg">{group.name}</CardTitle>
                 <CardDescription className="line-clamp-2">
@@ -118,10 +116,13 @@ function GroupsContent({
                 </div>
 
                 {group.is_member ? (
-                  <form action={async (formData) => {
-                    const groupId = formData.get("groupId");
-                    await leaveCourseGroup(parseInt(groupId as string));
-                  }} className="w-full">
+                  <form
+                    action={async (formData) => {
+                      const groupId = formData.get("groupId");
+                      await leaveCourseGroup(parseInt(groupId as string));
+                    }}
+                    className="w-full"
+                  >
                     <input type="hidden" name="groupId" value={group.id} />
                     <Button
                       type="submit"
@@ -134,16 +135,15 @@ function GroupsContent({
                     </Button>
                   </form>
                 ) : (
-                  <form action={async (formData) => {
-                    const groupId = formData.get("groupId");
-                    await joinCourseGroup(parseInt(groupId as string));
-                  }} className="w-full">
+                  <form
+                    action={async (formData) => {
+                      const groupId = formData.get("groupId");
+                      await joinCourseGroup(parseInt(groupId as string));
+                    }}
+                    className="w-full"
+                  >
                     <input type="hidden" name="groupId" value={group.id} />
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      size="sm"
-                    >
+                    <Button type="submit" className="w-full" size="sm">
                       <UserPlus className="mr-2 h-4 w-4" />
                       Join Group
                     </Button>

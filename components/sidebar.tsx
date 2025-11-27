@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, BookOpen, GraduationCap, Users, LogOut, User, Settings, Moon, Sun, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -41,7 +42,7 @@ const lecturerNavigation = [
 
 export function Sidebar({ userEmail, role, userName, avatarUrl }: SidebarProps) {
   const pathname = usePathname();
-  const { setTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const navigation = role === "lecturer" ? lecturerNavigation : studentNavigation;
 
   const getInitials = (name?: string) => {
@@ -50,10 +51,19 @@ export function Sidebar({ userEmail, role, userName, avatarUrl }: SidebarProps) 
     return parts.map(p => p[0]).join("").toUpperCase().slice(0, 2);
   };
 
+  const logoSrc = resolvedTheme === 'light' ? '/logo-light.svg' : '/logo-dark.svg';
+
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-background">
       {/* Header section */}
-      <div className="flex h-16 items-center border-b px-6">
+      <div className="flex h-16 items-center gap-3 border-b px-6">
+        <Image
+          src={logoSrc}
+          alt="Logo"
+          width={32}
+          height={32}
+          className="flex-shrink-0"
+        />
         <h1 className="text-xl font-bold">
           {role === "lecturer" ? "Lecturer Dashboard" : "Student Portal"}
         </h1>

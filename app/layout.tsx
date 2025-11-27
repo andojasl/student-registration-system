@@ -12,6 +12,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Student Portal",
   description: "Student registration and course management system",
+  icons: {
+    icon: "/logo-dark.svg",
+  },
 };
 
 export default function RootLayout({
