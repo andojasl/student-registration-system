@@ -14,6 +14,64 @@ export type Database = {
   }
   public: {
     Tables: {
+      class_schedules: {
+        Row: {
+          course_id: number
+          created_at: string | null
+          day_of_week: number
+          end_time: string
+          id: number
+          room_id: number | null
+          semester_id: number | null
+          start_time: string
+          updated_at: string | null
+        }
+        Insert: {
+          course_id: number
+          created_at?: string | null
+          day_of_week: number
+          end_time: string
+          id?: number
+          room_id?: number | null
+          semester_id?: number | null
+          start_time: string
+          updated_at?: string | null
+        }
+        Update: {
+          course_id?: number
+          created_at?: string | null
+          day_of_week?: number
+          end_time?: string
+          id?: number
+          room_id?: number | null
+          semester_id?: number | null
+          start_time?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_schedules_courses_fk"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_schedules_rooms_fk"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_schedules_semesters_fk"
+            columns: ["semester_id"]
+            isOneToOne: false
+            referencedRelation: "semesters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           credits: number
@@ -94,6 +152,39 @@ export type Database = {
         }
         Relationships: []
       }
+      group_members: {
+        Row: {
+          group_id: number
+          id: number
+          student_id: number
+        }
+        Insert: {
+          group_id: number
+          id?: number
+          student_id: number
+        }
+        Update: {
+          group_id?: number
+          id?: number
+          student_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_groups_fk"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_members_students_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       groups: {
         Row: {
           course_id: number | null
@@ -130,7 +221,7 @@ export type Database = {
           first_name: string
           id: number
           last_name: string
-          phone: string
+          phone: string | null
           program_id: number | null
           user_id: string | null
         }
@@ -140,7 +231,7 @@ export type Database = {
           first_name: string
           id?: number
           last_name: string
-          phone?: string
+          phone?: string | null
           program_id?: number | null
           user_id?: string | null
         }
@@ -150,7 +241,7 @@ export type Database = {
           first_name?: string
           id?: number
           last_name?: string
-          phone?: string
+          phone?: string | null
           program_id?: number | null
           user_id?: string | null
         }
@@ -230,6 +321,84 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          building: string | null
+          capacity: number | null
+          created_at: string | null
+          id: number
+          name: string
+          room_type: string | null
+        }
+        Insert: {
+          building?: string | null
+          capacity?: number | null
+          created_at?: string | null
+          id?: number
+          name: string
+          room_type?: string | null
+        }
+        Update: {
+          building?: string | null
+          capacity?: number | null
+          created_at?: string | null
+          id?: number
+          name?: string
+          room_type?: string | null
+        }
+        Relationships: []
+      }
+      schedule_exceptions: {
+        Row: {
+          created_at: string | null
+          exception_date: string
+          id: number
+          is_cancelled: boolean | null
+          new_end_time: string | null
+          new_room_id: number | null
+          new_start_time: string | null
+          notes: string | null
+          schedule_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          exception_date: string
+          id?: number
+          is_cancelled?: boolean | null
+          new_end_time?: string | null
+          new_room_id?: number | null
+          new_start_time?: string | null
+          notes?: string | null
+          schedule_id: number
+        }
+        Update: {
+          created_at?: string | null
+          exception_date?: string
+          id?: number
+          is_cancelled?: boolean | null
+          new_end_time?: string | null
+          new_room_id?: number | null
+          new_start_time?: string | null
+          notes?: string | null
+          schedule_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_exceptions_class_schedules_fk"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "class_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_exceptions_rooms_fk"
+            columns: ["new_room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
         ]
@@ -325,6 +494,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      time_slots: {
+        Row: {
+          created_at: string | null
+          end_time: string
+          id: number
+          label: string | null
+          start_time: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_time: string
+          id?: number
+          label?: string | null
+          start_time: string
+        }
+        Update: {
+          created_at?: string | null
+          end_time?: string
+          id?: number
+          label?: string | null
+          start_time?: string
+        }
+        Relationships: []
       }
       user: {
         Row: {
@@ -485,3 +678,5 @@ export const Constants = {
     Enums: {},
   },
 } as const
+A new version of Supabase CLI is available: v2.62.10 (currently installed v2.62.5)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
