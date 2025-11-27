@@ -94,7 +94,7 @@ async function CoursesContent() {
               href={`/student/courses/${registration.course_id}`}
               className="group"
             >
-              <Card className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer h-full overflow-hidden">
+              <Card className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 cursor-pointer h-full overflow-hidden pt-0">
                 <div
                   className={`h-2 w-full ${
                     courseColors[index % courseColors.length]
