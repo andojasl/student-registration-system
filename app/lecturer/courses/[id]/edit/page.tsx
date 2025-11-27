@@ -1,11 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { updateCourse, getSemesters, getDepartments } from "../../actions";
+import { updateCourse, getSemesters, getDepartments, getGroupsByCourse } from "../../actions";
 import { redirect } from "next/navigation";
 import { getUser } from "@/app/auth/actions";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { GroupsManagement } from "@/components/groups-management";
 
 export default async function EditCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -24,7 +25,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
 
   // Get lecturer info
   const { data: lecturer } = await supabase
-    .from('lecturers')
+    . from('lecturers')
     .select('id')
     .eq('user_id', user.id)
     .single();
@@ -42,10 +43,11 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
 
   const semesters = await getSemesters();
   const departments = await getDepartments();
+  const groups = await getGroupsByCourse(courseId);
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto space-y-6">
         <Link href="/lecturer/courses">
           <Button variant="ghost" className="mb-6">
             <ChevronLeft className="h-4 w-4 mr-2" />
@@ -129,7 +131,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
                 >
                   <option value="">None</option>
                   {departments.map((dept: any) => (
-                    <option key={dept.id} value={dept. id.toString()}>
+                    <option key={dept.id} value={dept.id.toString()}>
                       {dept.name}
                     </option>
                   ))}
@@ -169,6 +171,9 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
             </form>
           </CardContent>
         </Card>
+
+        {/* Groups Management Card */}
+        <GroupsManagement courseId={courseId} initialGroups={groups} />
       </div>
     </div>
   );
