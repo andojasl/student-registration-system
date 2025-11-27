@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
 
 export async function getPendingStudents() {
   const supabase = await createClient();
@@ -114,4 +115,83 @@ export async function rejectStudent(formData: FormData) {
 
   revalidatePath('/lecturer/dashboard');
   return redirect('/lecturer/dashboard?success=rejected');
+}
+
+export async function getLecturerCoursesOverview() {
+  noStore();
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return [];
+
+  const { data: lecturer } = await supabase
+    .from("lecturers" as any)
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!lecturer) return [];
+
+  const { data: courses, error } = await supabase
+    .from("courses" as any)
+    .select(
+      `
+      id,
+      name,
+      credits,
+      description,
+      program_id,
+      lecturer_id,
+      semesters(name),
+      departments(name)
+    `
+    )
+    .eq("lecturer_id", lecturer.id)
+    .order("name");
+
+  if (error || !courses) {
+    console.error("Error fetching lecturer courses:", error);
+    return [];
+  }
+
+  const courseIds = courses.map((c: any) => c.id);
+  if (courseIds.length === 0) return [];
+
+  const [{ data: registrations }, { data: groups }] = await Promise.all([
+    supabase
+      .from("registrations" as any)
+      .select("course_id")
+      .in("course_id", courseIds),
+    supabase.from("groups" as any).select("course_id").in("course_id", courseIds),
+  ]);
+
+  const enrollmentCounts =
+    registrations?.reduce<Record<number, number>>((acc, reg: any) => {
+      if (reg.course_id != null) {
+        acc[reg.course_id] = (acc[reg.course_id] || 0) + 1;
+      }
+      return acc;
+    }, {}) || {};
+
+  const groupCounts =
+    groups?.reduce<Record<number, number>>((acc, grp: any) => {
+      if (grp.course_id != null) {
+        acc[grp.course_id] = (acc[grp.course_id] || 0) + 1;
+      }
+      return acc;
+    }, {}) || {};
+
+  return courses.map((course: any) => ({
+    id: course.id,
+    name: course.name,
+    credits: course.credits,
+    description: course.description,
+    semester_name: course.semesters?.name ?? "Unassigned semester",
+    department_name: course.departments?.name ?? "Department N/A",
+    enrollment_count: enrollmentCounts[course.id] || 0,
+    group_count: groupCounts[course.id] || 0,
+  }));
 }

@@ -2,12 +2,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getCoursesByLecturer } from "./actions";
-import { Edit2, Trash2, Plus, GraduationCap } from "lucide-react";
+import { Edit2, Trash2, Plus, GraduationCap, Filter } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getUser } from "@/app/auth/actions";
 import Link from "next/link";
 
-export default async function LecturerCoursesPage() {
+type CoursesView = "all" | "mine";
+
+export default async function LecturerCoursesPage({
+  searchParams,
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   const user = await getUser();
 
   // Check if user is a lecturer
@@ -15,7 +21,7 @@ export default async function LecturerCoursesPage() {
     redirect('/auth/login');
   }
 
-  if (!user. is_active) {
+  if (!user.is_active) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -32,6 +38,17 @@ export default async function LecturerCoursesPage() {
 
   const courses = await getCoursesByLecturer();
 
+  const viewParam = searchParams?.view;
+  const normalizedView =
+    typeof viewParam === "string" && viewParam.toLowerCase() === "mine"
+      ? "mine"
+      : "all";
+  const view: CoursesView = normalizedView;
+  const filteredCourses =
+    view === "mine"
+      ? courses.filter((course: any) => course.is_owned_by_current_lecturer)
+      : courses;
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
@@ -42,38 +59,74 @@ export default async function LecturerCoursesPage() {
               Manage courses in your program
             </p>
           </div>
-          <Link href="/lecturer/courses/new">
-            <Button className="w-full md:w-auto">
-              <Plus className="h-4 w-4 mr-2" />
-              Create New Course
-            </Button>
-          </Link>
-        </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <div className="inline-flex items-center gap-2 rounded-md border p-1 bg-card">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <div className="flex rounded-md overflow-hidden border border-border/50">
+                <Link
+                  href="/lecturer/courses?view=all"
+                  className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                    view === "all"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  All program courses
+                </Link>
+                <Link
+                  href="/lecturer/courses?view=mine"
+                  className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                    view === "mine"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  My courses
+                </Link>
+              </div>
+            </div>
+            <Link href="/lecturer/courses/new">
+              <Button className="w-full md:w-auto">
+                <Plus className="h-4 w-4 mr-2" />
+                Create New Course
+              </Button>
+            </Link>
+          </div>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <GraduationCap className="h-5 w-5" />
-              Your Courses
+              {view === "mine" ? "My Courses" : "Program Courses"}
             </CardTitle>
             <CardDescription>
-              {courses.length === 0 
-                ? "No courses yet" 
-                : `${courses.length} course${courses.length !== 1 ? 's' : ''} in your program`}
+              {filteredCourses.length === 0 
+                ? "No courses found for this view" 
+                : `${filteredCourses.length} course${filteredCourses.length !== 1 ? 's' : ''} ${view === "mine" ? "you teach" : "in your program"}`}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {courses.length === 0 ?  (
+            {filteredCourses.length === 0 ?  (
               <div className="text-center py-12 text-muted-foreground">
                 <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p className="mb-4">No courses created yet.  Get started by creating your first course. </p>
-                <Link href="/lecturer/courses/new">
-                  <Button>Create First Course</Button>
-                </Link>
+                <p className="mb-4">
+                  {view === "mine"
+                    ? "You are not assigned to any courses yet."
+                    : "No courses created yet. Get started by creating your first course."}
+                </p>
+                {view === "mine" ? (
+                  <Link href="/lecturer/courses?view=all" className="inline-block">
+                    <Button variant="outline">View all program courses</Button>
+                  </Link>
+                ) : (
+                  <Link href="/lecturer/courses/new">
+                    <Button>Create First Course</Button>
+                  </Link>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
-                {courses.map((course: any) => (
+                {filteredCourses.map((course: any) => (
                   <div
                     key={course.id}
                     className="p-4 border rounded-lg bg-card hover:bg-accent/5 transition-colors"
@@ -90,6 +143,9 @@ export default async function LecturerCoursesPage() {
                           <Badge variant="secondary">
                             {course.semester_name}
                           </Badge>
+                          {!course.is_owned_by_current_lecturer && (
+                            <Badge variant="outline">Program course</Badge>
+                          )}
                         </div>
                         
                         {course.description && (
