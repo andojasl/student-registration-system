@@ -15,10 +15,10 @@ export async function getCoursesByLecturer() {
 
   // Get lecturer record with program info
   const { data: lecturer } = await supabase
-    .from('lecturers')
+    . from('lecturers')
     .select('id, program_id, programs(name)')
     .eq('user_id', user.id)
-    .single();
+    . single();
 
   if (!lecturer?. program_id) {
     return [];
@@ -63,7 +63,7 @@ export async function getCoursesByLecturer() {
 export async function createCourse(formData: FormData) {
   const supabase = await createClient();
   
-  const { data: { user } } = await supabase. auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
     return redirect('/auth/login');
@@ -71,8 +71,8 @@ export async function createCourse(formData: FormData) {
 
   // Get lecturer record
   const { data: lecturer } = await supabase
-    .from('lecturers')
-    . select('id, program_id')
+    . from('lecturers')
+    .select('id, program_id')
     .eq('user_id', user.id)
     . single();
 
@@ -83,7 +83,7 @@ export async function createCourse(formData: FormData) {
   const name = formData.get('name') as string;
   const credits = parseInt(formData.get('credits') as string);
   const description = formData. get('description') as string;
-  const semester_id = parseInt(formData.get('semester_id') as string);
+  const semester_id = parseInt(formData. get('semester_id') as string);
   const department_id = formData.get('department_id') as string;
 
   if (!name || !credits || !semester_id) {
@@ -128,7 +128,7 @@ export async function updateCourse(formData: FormData) {
     . single();
 
   if (!lecturer) {
-    return redirect('/lecturer/courses? error=' + encodeURIComponent('Lecturer not found'));
+    return redirect('/lecturer/courses?error=' + encodeURIComponent('Lecturer not found'));
   }
 
   const courseId = parseInt(formData.get('courseId') as string);
@@ -188,7 +188,7 @@ export async function checkCourseRegistrations(courseId: number) {
 export async function deleteCourse(courseId: number) {
   const supabase = await createClient();
   
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth. getUser();
   
   if (!user) {
     return redirect('/auth/login');
@@ -262,4 +262,202 @@ export async function getDepartments() {
     .order('name');
 
   return departments || [];
+}
+
+// Group Management Functions
+export async function getGroupsByCourse(courseId: number) {
+  const supabase = await createClient();
+  
+  const { data: groups, error } = await supabase
+    .from('groups')
+    .select(`
+      id,
+      name,
+      description,
+      course_id,
+      group_members(id)
+    `)
+    .eq('course_id', courseId)
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching groups:', error);
+    return [];
+  }
+
+  return groups?. map((group: any) => ({
+    id: group.id,
+    name: group.name,
+    description: group.description,
+    course_id: group.course_id,
+    member_count: group.group_members?.length || 0,
+  })) || [];
+}
+
+export async function createGroup(data: { name: string; description: string; course_id: number }) {
+  const supabase = await createClient();
+  
+  const { data: { user } } = await supabase.auth. getUser();
+  
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  // Verify the course belongs to this lecturer
+  const { data: lecturer } = await supabase
+    .from('lecturers')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (!lecturer) {
+    throw new Error('Lecturer not found');
+  }
+
+  const { data: course } = await supabase
+    .from('courses')
+    .select('lecturer_id')
+    .eq('id', data.course_id)
+    .single();
+
+  if (course?.lecturer_id !== lecturer. id) {
+    throw new Error('Unauthorized to create group for this course');
+  }
+
+  const { error } = await supabase
+    .from('groups')
+    .insert({
+      name: data.name,
+      description: data.description || null,
+      course_id: data.course_id,
+    });
+
+  if (error) {
+    console.error('Error creating group:', error);
+    throw new Error('Failed to create group');
+  }
+
+  revalidatePath(`/lecturer/courses/${data.course_id}/edit`);
+}
+
+export async function updateGroup(groupId: number, data: { name: string; description: string }) {
+  const supabase = await createClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  // Get lecturer info and verify ownership
+  const { data: lecturer } = await supabase
+    . from('lecturers')
+    .select('id')
+    . eq('user_id', user. id)
+    .single();
+
+  if (!lecturer) {
+    throw new Error('Lecturer not found');
+  }
+
+  // Verify the group's course belongs to this lecturer
+  const { data: group } = await supabase
+    .from('groups')
+    . select('course_id, courses(lecturer_id)')
+    .eq('id', groupId)
+    .single();
+
+  if (group?.courses?.lecturer_id !== lecturer.id) {
+    throw new Error('Unauthorized to edit this group');
+  }
+
+  const { error } = await supabase
+    .from('groups')
+    .update({
+      name: data.name,
+      description: data.description || null,
+    })
+    .eq('id', groupId);
+
+  if (error) {
+    console.error('Error updating group:', error);
+    throw new Error('Failed to update group');
+  }
+
+  const courseId = group.course_id;
+  revalidatePath(`/lecturer/courses/${courseId}/edit`);
+}
+
+export async function deleteGroup(groupId: number) {
+  const supabase = await createClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  // Get lecturer info
+  const { data: lecturer } = await supabase
+    .from('lecturers')
+    . select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (!lecturer) {
+    throw new Error('Lecturer not found');
+  }
+
+  // Verify the group's course belongs to this lecturer
+  const { data: group } = await supabase
+    . from('groups')
+    .select('course_id, courses(lecturer_id)')
+    .eq('id', groupId)
+    . single();
+
+  if (group?. courses?.lecturer_id !== lecturer. id) {
+    throw new Error('Unauthorized to delete this group');
+  }
+
+  const courseId = group.course_id;
+
+  // First, delete all members in this group
+  const { error: membersError } = await supabase
+    .from('group_members')
+    .delete()
+    .eq('group_id', groupId);
+
+  if (membersError) {
+    console.error('Error deleting group members:', membersError);
+    throw new Error('Failed to delete group members');
+  }
+
+  // Then delete the group
+  const { error: groupError } = await supabase
+    .from('groups')
+    .delete()
+    .eq('id', groupId);
+
+  if (groupError) {
+    console.error('Error deleting group:', groupError);
+    throw new Error('Failed to delete group');
+  }
+
+  revalidatePath(`/lecturer/courses/${courseId}/edit`);
+}
+
+export async function checkGroupMembers(groupId: number) {
+  const supabase = await createClient();
+  
+  const { data: members, error } = await supabase
+    .from('group_members')
+    .select('id')
+    .eq('group_id', groupId);
+
+  if (error) {
+    console.error('Error checking group members:', error);
+    return 0;
+  }
+
+  return members?.length || 0;
 }
