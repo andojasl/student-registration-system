@@ -116,14 +116,9 @@ function GroupsContent({
                 </div>
 
                 {group.is_member ? (
-                  <form
-                    action={async (formData) => {
-                      const groupId = formData.get("groupId");
-                      await leaveCourseGroup(parseInt(groupId as string));
-                    }}
-                    className="w-full"
-                  >
+                  <form action={leaveCourseGroup} className="w-full">
                     <input type="hidden" name="groupId" value={group.id} />
+                    <input type="hidden" name="courseId" value={courseId} />
                     <Button
                       type="submit"
                       variant="outline"
@@ -135,14 +130,9 @@ function GroupsContent({
                     </Button>
                   </form>
                 ) : (
-                  <form
-                    action={async (formData) => {
-                      const groupId = formData.get("groupId");
-                      await joinCourseGroup(parseInt(groupId as string));
-                    }}
-                    className="w-full"
-                  >
+                  <form action={joinCourseGroup} className="w-full">
                     <input type="hidden" name="groupId" value={group.id} />
+                    <input type="hidden" name="courseId" value={courseId} />
                     <Button type="submit" className="w-full" size="sm">
                       <UserPlus className="mr-2 h-4 w-4" />
                       Join Group

@@ -330,7 +330,9 @@ export async function getCourseGroups(courseId: number) {
   }));
 }
 
-export async function joinCourseGroup(groupId: number) {
+export async function joinCourseGroup(formData: FormData) {
+  const groupId = parseInt(formData.get("groupId") as string);
+  const courseId = formData.get("courseId") as string;
   const supabase = await createClient();
 
   const {
@@ -367,13 +369,15 @@ export async function joinCourseGroup(groupId: number) {
     );
   }
 
-  revalidatePath("/student/courses");
+  revalidatePath(`/student/courses/${courseId}/groups`);
   return redirect(
-    "/student/courses?success=" + encodeURIComponent("group_joined")
+    `/student/courses/${courseId}/groups?success=` + encodeURIComponent("group_joined")
   );
 }
 
-export async function leaveCourseGroup(groupId: number) {
+export async function leaveCourseGroup(formData: FormData) {
+  const groupId = parseInt(formData.get("groupId") as string);
+  const courseId = formData.get("courseId") as string;
   const supabase = await createClient();
 
   const {
@@ -411,8 +415,8 @@ export async function leaveCourseGroup(groupId: number) {
     );
   }
 
-  revalidatePath("/student/courses");
+  revalidatePath(`/student/courses/${courseId}/groups`);
   return redirect(
-    "/student/courses?success=" + encodeURIComponent("group_left")
+    `/student/courses/${courseId}/groups?success=` + encodeURIComponent("group_left")
   );
 }
