@@ -12,7 +12,7 @@ type CoursesView = "all" | "mine";
 export default async function LecturerCoursesPage({
   searchParams,
 }: {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const user = await getUser();
 
@@ -37,8 +37,9 @@ export default async function LecturerCoursesPage({
   }
 
   const courses = await getCoursesByLecturer();
+  const resolvedSearchParams = await searchParams;
 
-  const viewParam = searchParams?.view;
+  const viewParam = resolvedSearchParams?.view;
   const normalizedView =
     typeof viewParam === "string" && viewParam.toLowerCase() === "mine"
       ? "mine"
@@ -50,22 +51,26 @@ export default async function LecturerCoursesPage({
       : courses;
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Course Management</h1>
-            <p className="text-muted-foreground">
-              Manage courses in your program
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-            <div className="inline-flex items-center gap-2 rounded-md border p-1 bg-card">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <div className="flex rounded-md overflow-hidden border border-border/50">
+    <div className="min-h-screen bg-background p-6 md:p-10">
+      <div className="max-w-6xl mx-auto grid gap-8 lg:grid-cols-[1.1fr_1.9fr]">
+        <div className="rounded-2xl border bg-gradient-to-b from-card/80 to-card/40 p-6 shadow-sm">
+          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-3">
+            Lecturer
+          </p>
+          <h1 className="text-3xl font-bold leading-tight mb-3">Course Management</h1>
+          <p className="text-muted-foreground mb-6">
+            Filter by ownership or add new courses to your program.
+          </p>
+          <div className="flex flex-col gap-3">
+            <div className="inline-flex items-center gap-2 rounded-lg border bg-card/70 p-1 shadow-inner">
+              <div className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground">
+                <Filter className="h-4 w-4" />
+                View
+              </div>
+              <div className="flex rounded-md overflow-hidden border border-border/60">
                 <Link
                   href="/lecturer/courses?view=all"
-                  className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  className={`px-4 py-2 text-xs font-semibold transition-colors ${
                     view === "all"
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-muted"
@@ -75,7 +80,7 @@ export default async function LecturerCoursesPage({
                 </Link>
                 <Link
                   href="/lecturer/courses?view=mine"
-                  className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  className={`px-4 py-2 text-xs font-semibold transition-colors ${
                     view === "mine"
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-muted"
@@ -85,28 +90,31 @@ export default async function LecturerCoursesPage({
                 </Link>
               </div>
             </div>
-            <Link href="/lecturer/courses/new">
-              <Button className="w-full md:w-auto">
-                <Plus className="h-4 w-4 mr-2" />
+            <Link href="/lecturer/courses/new" className="w-full">
+              <Button className="w-full justify-center gap-2" size="lg">
+                <Plus className="h-4 w-4" />
                 Create New Course
               </Button>
             </Link>
           </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <Card className="rounded-2xl border bg-card/90 shadow-md">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <GraduationCap className="h-5 w-5" />
               {view === "mine" ? "My Courses" : "Program Courses"}
             </CardTitle>
             <CardDescription>
-              {filteredCourses.length === 0 
-                ? "No courses found for this view" 
-                : `${filteredCourses.length} course${filteredCourses.length !== 1 ? 's' : ''} ${view === "mine" ? "you teach" : "in your program"}`}
+              {filteredCourses.length === 0
+                ? "No courses found for this view"
+                : `${filteredCourses.length} course${filteredCourses.length !== 1 ? "s" : ""} ${
+                    view === "mine" ? "you teach" : "in your program"
+                  }`}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            {filteredCourses.length === 0 ?  (
+          <CardContent className="space-y-4">
+            {filteredCourses.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p className="mb-4">
@@ -125,58 +133,50 @@ export default async function LecturerCoursesPage({
                 )}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredCourses.map((course: any) => (
                   <div
                     key={course.id}
-                    className="p-4 border rounded-lg bg-card hover:bg-accent/5 transition-colors"
+                    className="rounded-xl border bg-card/80 p-4 hover:border-primary/50 hover:shadow-md transition-colors"
                   >
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                      <div className="space-y-2 flex-1">
+                      <div className="space-y-3 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold text-lg">
-                            {course.name}
-                          </h3>
-                          <Badge variant="outline">
-                            {course.credits} credits
-                          </Badge>
-                          <Badge variant="secondary">
-                            {course.semester_name}
-                          </Badge>
+                          <h3 className="font-semibold text-lg">{course.name}</h3>
+                          <Badge variant="outline">{course.credits} credits</Badge>
+                          <Badge variant="secondary">{course.semester_name}</Badge>
                           {!course.is_owned_by_current_lecturer && (
                             <Badge variant="outline">Program course</Badge>
                           )}
                         </div>
-                        
+
                         {course.description && (
-                          <p className="text-sm text-muted-foreground">
-                            {course.description}
-                          </p>
+                          <p className="text-sm text-muted-foreground">{course.description}</p>
                         )}
-                        
-                        <div className="text-xs text-muted-foreground space-y-1">
+
+                        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                           {course.semester_start_date && course.semester_end_date && (
-                            <p>
-                              <span className="font-medium">Duration:</span>{" "}
-                              {new Date(course.semester_start_date).toLocaleDateString()} -{" "}
+                            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1">
+                              Duration:{" "}
+                              {new Date(course.semester_start_date).toLocaleDateString()} –{" "}
                               {new Date(course.semester_end_date).toLocaleDateString()}
-                            </p>
+                            </span>
                           )}
-                          <p>
-                            <span className="font-medium">Lecturer:</span> {course.lecturer_name}
-                          </p>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1">
+                            Lecturer: {course.lecturer_name}
+                          </span>
                         </div>
                       </div>
 
-                      <div className="flex gap-2">
-                        <Link href={`/lecturer/courses/${course.id}/edit`}>
-                          <Button variant="outline" size="sm">
+                      <div className="flex gap-2 md:flex-col md:min-w-[140px]">
+                        <Link href={`/lecturer/courses/${course.id}/edit`} className="flex-1">
+                          <Button variant="outline" size="sm" className="w-full">
                             <Edit2 className="h-4 w-4 mr-1" />
                             Edit
                           </Button>
                         </Link>
-                        <Link href={`/lecturer/courses/${course.id}/delete`}>
-                          <Button variant="destructive" size="sm">
+                        <Link href={`/lecturer/courses/${course.id}/delete`} className="flex-1">
+                          <Button variant="destructive" size="sm" className="w-full">
                             <Trash2 className="h-4 w-4 mr-1" />
                             Delete
                           </Button>
