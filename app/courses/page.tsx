@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -63,6 +62,7 @@ export default function StudentCoursesPage() {
             Manage and view all your enrolled courses
           </p>
         </div>
+        {/* hier terug naar student/courses/browse */}
         <Link href="/student/courses/browse">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
@@ -86,11 +86,12 @@ async function CoursesContent() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {registrations.map((registration: any, index: number) => {
           const statusKey = registration.status as keyof typeof statusConfig;
-          const StatusIcon = statusConfig[statusKey]. icon;
+          const StatusIcon = statusConfig[statusKey].icon;
 
           return (
             <Link
               key={registration.id}
+              // ook hier student/courses gebruiken
               href={`/student/courses/${registration.course_id}`}
               className="group"
             >
@@ -127,7 +128,7 @@ async function CoursesContent() {
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="mr-2 h-4 w-4" />
-                      {registration. department_name || "N/A"}
+                      {registration.department_name || "N/A"}
                     </div>
                     {registration.semester_name && (
                       <div className="flex items-center text-sm text-muted-foreground">
@@ -169,7 +170,7 @@ async function CoursesContent() {
         <Card>
           <CardContent className="p-12 text-center space-y-4">
             <p className="text-muted-foreground">
-              No courses found. Browse available courses to get started. 
+              No courses found. Browse available courses to get started.
             </p>
             <Link href="/student/courses/browse">
               <Button>

@@ -8,12 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowLeft,
-  Users,
-  UserPlus,
-  UserMinus,
-} from "lucide-react";
+import { ArrowLeft, Users, UserPlus, UserMinus } from "lucide-react";
 import Link from "next/link";
 import { getCourseGroups, joinCourseGroup, leaveCourseGroup } from "@/app/courses/actions";
 import { notFound } from "next/navigation";
@@ -33,7 +28,7 @@ export default async function CourseGroupsPage({
   return (
     <div className="space-y-8">
       <div>
-        <Link href={`/student/courses/${courseId}`}>
+        <Link href={`/courses/${courseId}`}>
           <Button variant="ghost" size="sm" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Course
@@ -67,14 +62,17 @@ function GroupsContent({
           <CardContent className="p-12 text-center space-y-4">
             <Users className="h-12 w-12 mx-auto text-muted-foreground" />
             <p className="text-muted-foreground text-lg">
-              No study groups available for this course yet. 
+              No study groups available for this course yet.
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {groups.map((group) => (
-            <Card key={group.id} className="hover:shadow-lg transition-all duration-200">
+            <Card
+              key={group.id}
+              className="hover:shadow-lg transition-all duration-200"
+            >
               <CardHeader>
                 <CardTitle className="text-lg">{group.name}</CardTitle>
                 <CardDescription className="line-clamp-2">
@@ -103,7 +101,7 @@ function GroupsContent({
                               {student.first_name} {student.last_name}
                             </p>
                             <p className="text-muted-foreground truncate">
-                              {student. email}
+                              {student.email}
                             </p>
                           </div>
                         </div>
@@ -116,11 +114,14 @@ function GroupsContent({
                   </div>
                 </div>
 
-                {group.is_member ?  (
-                  <form action={async (formData) => {
-                    const groupId = formData.get("groupId");
-                    await leaveCourseGroup(parseInt(groupId as string));
-                  }} className="w-full">
+                {group.is_member ? (
+                  <form
+                    action={async (formData) => {
+                      const groupId = formData.get("groupId");
+                      await leaveCourseGroup(parseInt(groupId as string));
+                    }}
+                    className="w-full"
+                  >
                     <input type="hidden" name="groupId" value={group.id} />
                     <Button
                       type="submit"
@@ -133,16 +134,15 @@ function GroupsContent({
                     </Button>
                   </form>
                 ) : (
-                  <form action={async (formData) => {
-                    const groupId = formData.get("groupId");
-                    await joinCourseGroup(parseInt(groupId as string));
-                  }} className="w-full">
+                  <form
+                    action={async (formData) => {
+                      const groupId = formData.get("groupId");
+                      await joinCourseGroup(parseInt(groupId as string));
+                    }}
+                    className="w-full"
+                  >
                     <input type="hidden" name="groupId" value={group.id} />
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      size="sm"
-                    >
+                    <Button type="submit" className="w-full" size="sm">
                       <UserPlus className="mr-2 h-4 w-4" />
                       Join Group
                     </Button>
@@ -160,7 +160,7 @@ function GroupsContent({
 function GroupsFallback() {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 6 }). map((_, index) => (
+      {Array.from({ length: 6 }).map((_, index) => (
         <Card key={index}>
           <CardContent className="space-y-3 py-6">
             <div className="h-6 w-32 rounded bg-muted animate-pulse" />
