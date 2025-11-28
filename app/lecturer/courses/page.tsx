@@ -191,5 +191,6 @@ export default async function LecturerCoursesPage({
         </Card>
       </div>
     </div>
+    </div>
   );
 }

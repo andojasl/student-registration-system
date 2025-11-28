@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BookOpen, GraduationCap, Users, LogOut, User, Settings, Moon, Sun, Monitor } from "lucide-react";
+import { LayoutDashboard, BookOpen, GraduationCap, Users, LogOut, User, Settings, Moon, Sun, Monitor, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ interface SidebarProps {
 const studentNavigation = [
   { name: "Dashboard", href: "/student", icon: LayoutDashboard },
   { name: "My Courses", href: "/student/courses", icon: BookOpen },
+  { name: "Timetable", href: "/student/schedules", icon: Calendar },
   { name: "My Groups", href: "/student/groups", icon: Users },
 ];
 
@@ -38,6 +39,7 @@ const lecturerNavigation = [
   { name: "Dashboard", href: "/lecturer/dashboard", icon: LayoutDashboard },
   { name: "Enrollments", href: "/lecturer/enrollments", icon: BookOpen },
   { name: "Courses", href: "/lecturer/courses", icon: GraduationCap },
+  { name: "Schedules", href: "/lecturer/schedules", icon: Calendar },
 ];
 
 export function Sidebar({ userEmail, role, userName, avatarUrl }: SidebarProps) {

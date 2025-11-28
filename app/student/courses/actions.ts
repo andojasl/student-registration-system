@@ -226,6 +226,7 @@ export async function requestCourseEnrollment(formData: FormData) {
 
   revalidatePath("/student/courses");
   revalidatePath("/student/courses/browse");
+  revalidatePath("/student/schedules");
   return redirect(
     "/student/courses/browse?success=" + encodeURIComponent("requested")
   );
