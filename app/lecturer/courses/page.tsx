@@ -52,7 +52,7 @@ export default async function LecturerCoursesPage({
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-10">
-      <div className="max-w-6xl mx-auto grid gap-8 lg:grid-cols-[1.1fr_1.9fr]">
+      <div className="max-w-6xl mx-auto gap-8 flex flex-col ">
         <div className="rounded-2xl border bg-gradient-to-b from-card/80 to-card/40 p-6 shadow-sm">
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-3">
             Lecturer
@@ -190,7 +190,6 @@ export default async function LecturerCoursesPage({
           </CardContent>
         </Card>
       </div>
-    </div>
     </div>
   );
 }
