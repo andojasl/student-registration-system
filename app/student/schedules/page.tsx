@@ -18,7 +18,7 @@ export default async function StudentSchedulesPage() {
   const schedules = await getStudentWeeklySchedule();
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen bg-background  ">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
