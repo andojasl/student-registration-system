@@ -71,7 +71,7 @@ export async function getStudentWeeklySchedule() {
       )
     `)
     .eq('student_id', student.id)
-    .in('status', ['active', 'approved']);
+    .in('status', ['active', 'complete']);
 
   if (error) {
     console.error('Error fetching student schedules:', error);

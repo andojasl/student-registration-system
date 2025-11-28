@@ -112,7 +112,7 @@ async function DashboardContent() {
 
       <div>
         <h2 className="text-xl font-semibold mb-4">Quick Links</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 max-w-2xl">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Link href="/student/courses">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-primary/50">
               <CardHeader>
@@ -128,6 +128,23 @@ async function DashboardContent() {
               </CardHeader>
             </Card>
           </Link>
+
+          <Link href="/student/schedules">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-primary/50">
+              <CardHeader>
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                    <BookOpen className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle>Timetable</CardTitle>
+                    <CardDescription>View this week's schedule</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </Link>
+
 
           <Link href="/student/groups">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-primary/50">
